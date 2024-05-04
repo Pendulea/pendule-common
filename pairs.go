@@ -3,6 +3,7 @@ package pcommon
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -69,4 +70,36 @@ func (p Pair) BuildBinanceSymbol() string {
 		return strings.ToUpper(p.Symbol0 + p.Symbol1)
 	}
 	return ""
+}
+
+func (pair Pair) BuildBinanceArchiveURL() string {
+	symbol := pair.BuildBinanceSymbol()
+	if symbol == "" {
+		return ""
+	}
+
+	date := pair.MinHistoricalDay
+	futures := pair.Futures
+
+	fileName := fmt.Sprintf("%s-trades-%s.zip", symbol, date)
+	if futures {
+		return fmt.Sprintf("https://data.binance.vision/data/futures/um/daily/trades/%s/%s", symbol, fileName)
+	} else {
+		return fmt.Sprintf("https://data.binance.vision/data/spot/daily/trades/%s/%s", symbol, fileName)
+	}
+}
+
+func (pair Pair) CheckBinanceSymbolWorks() (bool, error) {
+	symbol := pair.BuildBinanceSymbol()
+	if symbol == "" {
+		return false, nil
+	}
+
+	url := pair.BuildBinanceArchiveURL()
+	resp, err := http.Head(url) // Perform a HEAD request
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close() // Ensure we close the response body
+	return resp.StatusCode == 200, nil
 }

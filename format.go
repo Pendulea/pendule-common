@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"regexp"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 )
 
 const NinneDays = 60 * 24 * 3600_000
@@ -142,4 +144,40 @@ func ArrayDurationToArrInt64(durations []time.Duration) []int64 {
 		arr[i] = d.Milliseconds()
 	}
 	return arr
+}
+
+func DecodeMapIntoStruct(data map[string]interface{}, result interface{}) error {
+	decoderConfig := &mapstructure.DecoderConfig{
+		Metadata: nil,
+		Result:   result,
+		TagName:  "json", // Set the tag name used in your structs if any, default is none
+	}
+
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return err
+	}
+
+	return decoder.Decode(data)
+}
+
+func EncodeStructIntoMap(data interface{}) (map[string]interface{}, error) {
+	decoderConfig := &mapstructure.DecoderConfig{
+		Metadata: nil,
+		Result:   data,
+		TagName:  "json", // Set the tag name used in your structs if any, default is none
+	}
+
+	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]interface{}
+	err = decoder.Decode(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

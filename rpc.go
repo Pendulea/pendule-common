@@ -2,6 +2,20 @@ package pcommon
 
 type EmptyStruct struct{}
 
+type Action struct {
+	Id      string                 `json:"id"`
+	Method  string                 `json:"method"`
+	Payload map[string]interface{} `json:"payload"`
+}
+
+type Response struct {
+	Id    string      `json:"id"`
+	Data  interface{} `json:"data"`
+	Error interface{} `json:"error"`
+}
+
+type Request map[string]interface{}
+
 type SetJSON struct {
 	Pair       Pair    `json:"pair"`
 	Consistent bool    `json:"consistent"`

@@ -19,7 +19,7 @@ func (tmap *TickMap) FilterInRange(t0 time.Time, t1 time.Time) TickMap {
 }
 
 func (m *TickMap) DeleteInRange(t0 time.Time, t1 time.Time) {
-	for time, _ := range *m {
+	for time := range *m {
 		if time >= t0.Unix() && time < t1.Unix() {
 			delete(*m, time)
 		}

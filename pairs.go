@@ -51,7 +51,7 @@ func (p Pair) ErrorFilter(allowedStablePairs []string) error {
 			return fmt.Errorf("symbol0 and symbol1 are required for binance pairs")
 		}
 
-		if allowedStablePairs != nil && len(allowedStablePairs) > 0 {
+		if len(allowedStablePairs) > 0 {
 			symb1 := strings.ToUpper(p.Symbol1)
 			for _, pair := range allowedStablePairs {
 				if symb1 == strings.ToUpper(pair) {

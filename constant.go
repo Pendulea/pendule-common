@@ -12,7 +12,9 @@ const MAX_TIME_FRAME = QUARTER
 
 var ARCHIVES_DIR = "./archives"
 var DATABASES_DIR = "./databases"
+
 var MAX_SIMULTANEOUS_PARSING = 3
+var MAX_SIMULTANEOUS_INDEXING = 3
 
 const FUTURES_KEY = "_futures"
 const SPOT_KEY = "_spot"

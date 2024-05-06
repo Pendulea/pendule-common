@@ -31,14 +31,6 @@ func (p *Pair) Copy() Pair {
 	}
 }
 
-func (p Pair) ParseIndicators() []string {
-	if p.Indicators == "" {
-		return []string{}
-	}
-
-	return strings.Split(p.Indicators, ",")
-}
-
 func (p Pair) BuildSetID() string {
 	if p.Binance {
 		return Format.BuildSetID(p.BuildBinanceSymbol(), p.Futures)
@@ -112,4 +104,57 @@ func (pair Pair) CheckBinanceSymbolWorks() (bool, error) {
 	}
 	defer resp.Body.Close() // Ensure we close the response body
 	return resp.StatusCode == 200, nil
+}
+
+func (pair Pair) ParseIndicators(supportedIndicatorList []string) []string {
+	if pair.Indicators == "" {
+		return []string{}
+	}
+	if pair.Indicators == "*" {
+		return supportedIndicatorList
+	}
+
+	allowedIndicators := strings.Split(pair.Indicators, ",")
+	finalList := make([]string, 0) // Use a separate slice for the results to avoid duplication
+
+	for _, indicator := range allowedIndicators {
+		if strings.Contains(indicator, "*") {
+			// Handle wildcard entries
+			sp := strings.Split(indicator, "*")
+			if len(sp) != 2 {
+				continue // Skip invalid formats
+			}
+			prefix, suffix := sp[0], sp[1]
+			for _, ind := range supportedIndicatorList {
+				if strings.HasPrefix(ind, prefix) && strings.HasSuffix(ind, suffix) {
+					finalList = appendIfNotExists(finalList, ind)
+				}
+			}
+		} else {
+			// Handle exact matches
+			if contains(supportedIndicatorList, indicator) {
+				finalList = appendIfNotExists(finalList, indicator)
+			}
+		}
+	}
+
+	return finalList
+}
+
+// Helper function to check if a slice contains a specific string
+func contains(slice []string, str string) bool {
+	for _, s := range slice {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+
+// Append to the slice if the element does not already exist
+func appendIfNotExists(slice []string, str string) []string {
+	if !contains(slice, str) {
+		slice = append(slice, str)
+	}
+	return slice
 }

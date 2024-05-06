@@ -60,6 +60,7 @@ type GetCandlesRequest struct {
 	OffsetUnixTime int64  `json:"offset_unix_time"`
 	Symbol         string `json:"symbol"`
 	TimeFrame      int64  `json:"timeframe"`
+	Descending     bool   `json:"descending"`
 }
 
 type GetCandlesResponse struct {

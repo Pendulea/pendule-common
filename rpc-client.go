@@ -23,7 +23,7 @@ type RPCClient struct {
 	reconnectInterval time.Duration
 }
 
-func NewRPCClient(url string, reconnectInterval time.Duration, logging bool) *RPCClient {
+func (r rpc) NewClient(url string, reconnectInterval time.Duration, logging bool) *RPCClient {
 	s := &RPCClient{
 		parserServerURL:   url,
 		reconnect:         true,

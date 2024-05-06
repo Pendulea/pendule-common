@@ -5,11 +5,11 @@ import (
 	"reflect"
 )
 
-type rpcServer struct{}
+type rpc struct{}
 
-var RPCServer = rpcServer{}
+var RPC = rpc{}
 
-func (rpc rpcServer) HandleRPCRequest(a []byte, service interface{}) RPCResponse {
+func (rpc rpc) HandleRPCServerRequest(a []byte, service interface{}) RPCResponse {
 
 	//check if the action is a valid action
 	action := RPCAction{}

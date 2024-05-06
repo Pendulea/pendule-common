@@ -41,7 +41,7 @@ func (p Pair) ParseIndicators() []string {
 
 func (p Pair) BuildSetID() string {
 	if p.Binance {
-		return BuildSetID(p.BuildBinanceSymbol(), p.Futures)
+		return Format.BuildSetID(p.BuildBinanceSymbol(), p.Futures)
 	}
 	return ""
 }

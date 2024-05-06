@@ -5,8 +5,12 @@ import (
 	"sort"
 )
 
+type pmath struct{}
+
+var Math pmath
+
 // SafeMedian calculates the median of a slice of numbers
-func SafeMedian(values []float64) float64 {
+func (m pmath) SafeMedian(values []float64) float64 {
 	length := len(values)
 	if length == 0 {
 		return 0
@@ -20,7 +24,7 @@ func SafeMedian(values []float64) float64 {
 }
 
 // SafeAverage calculates the average of a slice of numbers
-func SafeAverage(values []float64) float64 {
+func (m pmath) SafeAverage(values []float64) float64 {
 	total := 0.0
 	for _, value := range values {
 		total += value
@@ -31,7 +35,7 @@ func SafeAverage(values []float64) float64 {
 	return total / float64(len(values))
 }
 
-func CalculateStandardDeviation(data []float64) float64 {
+func (m pmath) CalculateStandardDeviation(data []float64) float64 {
 	if len(data) < 2 {
 		return 0.0 // Standard deviation is not defined for one or zero elements.
 	}

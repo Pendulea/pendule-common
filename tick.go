@@ -133,13 +133,13 @@ func (candles TickArray) AggregateCandlesToCandle() Tick {
 		tradeVolumesSold = append(tradeVolumesSold, c.VolumeSold)
 	}
 
-	aggregateCandle.MedianVolumeBought = SafeMedian(tradeVolumesBought)
-	aggregateCandle.MedianVolumeSold = SafeMedian(tradeVolumesSold)
-	aggregateCandle.AverageVolumeBought = SafeAverage(tradeVolumesBought)
-	aggregateCandle.AverageVolumeSold = SafeAverage(tradeVolumesSold)
+	aggregateCandle.MedianVolumeBought = Math.SafeMedian(tradeVolumesBought)
+	aggregateCandle.MedianVolumeSold = Math.SafeMedian(tradeVolumesSold)
+	aggregateCandle.AverageVolumeBought = Math.SafeAverage(tradeVolumesBought)
+	aggregateCandle.AverageVolumeSold = Math.SafeAverage(tradeVolumesSold)
 
 	aggregateCandle.VWAP = candles.calculateVWAP()
-	aggregateCandle.StandardDeviation = CalculateStandardDeviation(append(tradeVolumesBought, tradeVolumesSold...))
+	aggregateCandle.StandardDeviation = Math.CalculateStandardDeviation(append(tradeVolumesBought, tradeVolumesSold...))
 
 	return aggregateCandle
 }

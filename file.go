@@ -14,7 +14,11 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-func EnsureDir(path string) error {
+type file struct{}
+
+var File = file{}
+
+func (f file) EnsureDir(path string) error {
 	err := os.MkdirAll(path, 0755) // Creates the directory with rwx permissions for owner and rx for group and others
 	if err != nil {
 		return fmt.Errorf("failed to create directory: %v", err)
@@ -23,7 +27,7 @@ func EnsureDir(path string) error {
 }
 
 // SortFolderFiles sorts ZIP files in a folder
-func SortFolderFilesDesc(folderPath string) ([]string, error) {
+func (f file) SortFolderFilesDesc(folderPath string) ([]string, error) {
 	files, err := os.ReadDir(folderPath)
 	if err != nil {
 		return nil, err
@@ -44,7 +48,7 @@ func SortFolderFilesDesc(folderPath string) ([]string, error) {
 }
 
 // getFileSize returns the size of the file
-func GetFileSize(filePath string) (int64, error) {
+func (f file) GetFileSize(filePath string) (int64, error) {
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
 		return 0, err
@@ -53,7 +57,7 @@ func GetFileSize(filePath string) (int64, error) {
 }
 
 // UnzipFile extracts a zip archive specified by zipPath into the directory outputPath.
-func UnzipFile(zipPath, outputPath string) error {
+func (f file) UnzipFile(zipPath, outputPath string) error {
 	r, err := zip.OpenReader(zipPath)
 	if err != nil {
 		return err // If opening the zip file fails, return the error
@@ -111,7 +115,7 @@ func UnzipFile(zipPath, outputPath string) error {
 }
 
 // remove filepath
-func RemoveFile(filePath string) error {
+func (f file) RemoveFile(filePath string) error {
 	err := os.Remove(filePath)
 	if err != nil {
 		return fmt.Errorf("failed to remove file: %v", err)
@@ -122,10 +126,10 @@ func RemoveFile(filePath string) error {
 type FileCallback func(fileName string)
 
 // Initializes the watcher and provides an initial list of zip files.
-func InitFolderWatcher(folderPath string, callback FileCallback, watcher *fsnotify.Watcher) error {
+func (f file) InitFolderWatcher(folderPath string, callback FileCallback, watcher *fsnotify.Watcher) error {
 	// First, list all existing zip files in the folder.
 
-	files, err := SortFolderFilesDesc(folderPath)
+	files, err := f.SortFolderFilesDesc(folderPath)
 	if err != nil {
 		return err
 	}
@@ -204,7 +208,7 @@ func hasFileBeenModified(filePath string, duration time.Duration) bool {
 	return time.Since(info.ModTime()) >= duration
 }
 
-func ListenPairJSONFileChange(pairsPath string, callback func(path string)) {
+func (f file) ListenPairJSONFileChange(pairsPath string, callback func(path string)) {
 	// Create a new watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {

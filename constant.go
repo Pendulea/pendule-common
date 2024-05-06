@@ -10,11 +10,19 @@ const QUARTER = 90 * DAY
 const MIN_TIME_FRAME = time.Second
 const MAX_TIME_FRAME = QUARTER
 
-var ARCHIVES_DIR = "./archives"
-var DATABASES_DIR = "./databases"
-
-var MAX_SIMULTANEOUS_PARSING = 3
-var MAX_SIMULTANEOUS_INDEXING = 3
-
 const FUTURES_KEY = "_futures"
 const SPOT_KEY = "_spot"
+
+type env struct {
+	ARCHIVES_DIR              string
+	DATABASES_DIR             string
+	MAX_SIMULTANEOUS_PARSING  int
+	MAX_SIMULTANEOUS_INDEXING int
+}
+
+var Env = env{
+	ARCHIVES_DIR:              "archives",
+	DATABASES_DIR:             "databases",
+	MAX_SIMULTANEOUS_PARSING:  3,
+	MAX_SIMULTANEOUS_INDEXING: 3,
+}

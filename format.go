@@ -9,10 +9,12 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-const NinneDays = 60 * 24 * 3600_000
+type format struct{}
+
+var Format = format{}
 
 // ExtractDateFromTradeZipFile extracts date from filename
-func ExtractDateFromTradeZipFile(filename string) (string, error) {
+func (f format) ExtractDateFromTradeZipFile(filename string) (string, error) {
 	regex := regexp.MustCompile(`(\d{4}-\d{2}-\d{2})\.zip$`)
 	matches := regex.FindStringSubmatch(filename)
 	if len(matches) > 1 {
@@ -21,7 +23,7 @@ func ExtractDateFromTradeZipFile(filename string) (string, error) {
 	return "", errors.New("no match found")
 }
 
-func TimeFrameToLabel(timeFrame time.Duration) (string, error) {
+func (f format) TimeFrameToLabel(timeFrame time.Duration) (string, error) {
 	if timeFrame > MAX_TIME_FRAME {
 		return "", errors.New("time frame is too large")
 	}
@@ -48,25 +50,25 @@ func TimeFrameToLabel(timeFrame time.Duration) (string, error) {
 }
 
 // StrDateToDate converts a string date to a time.Time object
-func StrDateToDate(dateStr string) (time.Time, error) {
+func (f format) StrDateToDate(dateStr string) (time.Time, error) {
 	layout := "2006-01-02T15:04:05Z"
 	return time.Parse(layout, dateStr+"T00:00:00Z")
 }
 
 // FormatDateStr formats a time.Time object to a string
-func FormatDateStr(date time.Time) string {
+func (f format) FormatDateStr(date time.Time) string {
 	return date.Format("2006-01-02")
 }
 
 // BuildDateStr computes a date string from days ago
-func BuildDateStr(daysAgo int) string {
+func (f format) BuildDateStr(daysAgo int) string {
 	now := time.Now()
 	pastDate := now.AddDate(0, 0, -daysAgo)
 	return pastDate.Format("2006-01-02")
 }
 
 // LargeBytesToShortString converts byte size to a human-readable string
-func LargeBytesToShortString(b int64) string {
+func (f format) LargeBytesToShortString(b int64) string {
 	switch {
 	case b >= 1_000_000_000:
 		return fmt.Sprintf("%.2fgb", float64(b)/1_000_000_000)
@@ -79,7 +81,7 @@ func LargeBytesToShortString(b int64) string {
 	}
 }
 
-func LargeNumberToShortString(n int64) string {
+func (f format) LargeNumberToShortString(n int64) string {
 	if n >= 1_000_000_000 {
 		return fmt.Sprintf("%.2fb", float64(n)/1_000_000_000)
 	}
@@ -94,7 +96,7 @@ func LargeNumberToShortString(n int64) string {
 }
 
 // AccurateHumanize provides a human-readable representation of time duration in milliseconds
-func AccurateHumanize(d time.Duration) string {
+func (f format) AccurateHumanize(d time.Duration) string {
 	if d < time.Second {
 		return fmt.Sprintf("%dms", d.Milliseconds())
 	}
@@ -123,14 +125,14 @@ func AccurateHumanize(d time.Duration) string {
 	return d.String()
 }
 
-func BuildSetID(symbol string, future bool) string {
+func (f format) BuildSetID(symbol string, future bool) string {
 	if future {
 		return symbol + FUTURES_KEY
 	}
 	return symbol + SPOT_KEY
 }
 
-func CuteHash(s string) string {
+func (f format) CuteHash(s string) string {
 	var h int
 	for i, c := range s {
 		h += i + int(c)
@@ -138,7 +140,7 @@ func CuteHash(s string) string {
 	return fmt.Sprintf("%010d", h)
 }
 
-func ArrayDurationToArrInt64(durations []time.Duration) []int64 {
+func (f format) ArrayDurationToArrInt64(durations []time.Duration) []int64 {
 	arr := make([]int64, len(durations))
 	for i, d := range durations {
 		arr[i] = d.Milliseconds()
@@ -146,7 +148,7 @@ func ArrayDurationToArrInt64(durations []time.Duration) []int64 {
 	return arr
 }
 
-func DecodeMapIntoStruct(data map[string]interface{}, result interface{}) error {
+func (f format) DecodeMapIntoStruct(data map[string]interface{}, result interface{}) error {
 	decoderConfig := &mapstructure.DecoderConfig{
 		Metadata: nil,
 		Result:   result,
@@ -161,7 +163,7 @@ func DecodeMapIntoStruct(data map[string]interface{}, result interface{}) error 
 	return decoder.Decode(data)
 }
 
-func EncodeStructIntoMap(data interface{}) (map[string]interface{}, error) {
+func (f format) EncodeStructIntoMap(data interface{}) (map[string]interface{}, error) {
 	decoderConfig := &mapstructure.DecoderConfig{
 		Metadata: nil,
 		Result:   data,

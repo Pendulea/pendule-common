@@ -11,9 +11,9 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Client struct {
+type RPCClient struct {
 	conn              *websocket.Conn
-	requests          map[string]chan Response
+	requests          map[string]chan RPCResponse
 	mu                sync.Mutex
 	reconnect         bool
 	connected         bool
@@ -23,18 +23,18 @@ type Client struct {
 	reconnectInterval time.Duration
 }
 
-func NewRPCClient(url string, reconnectInterval time.Duration, logging bool) *Client {
-	s := &Client{
+func NewRPCClient(url string, reconnectInterval time.Duration, logging bool) *RPCClient {
+	s := &RPCClient{
 		parserServerURL:   url,
 		reconnect:         true,
-		requests:          make(map[string]chan Response),
+		requests:          make(map[string]chan RPCResponse),
 		logging:           logging,
 		reconnectInterval: reconnectInterval,
 	}
 	return s
 }
 
-func (s *Client) Connect() {
+func (s *RPCClient) Connect() {
 	u, _ := url.Parse(s.parserServerURL)
 	conn, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
@@ -69,14 +69,14 @@ func (s *Client) Connect() {
 	}()
 }
 
-func (s *Client) CheckConnectedError() error {
+func (s *RPCClient) CheckConnectedError() error {
 	if !s.connected {
 		return fmt.Errorf("service is not connected")
 	}
 	return nil
 }
 
-func (s *Client) readMessages() {
+func (s *RPCClient) readMessages() {
 	s.wg.Add(1)
 	for {
 		_, message, err := s.conn.ReadMessage()
@@ -88,7 +88,7 @@ func (s *Client) readMessages() {
 			return
 		}
 
-		var resp Response
+		var resp RPCResponse
 		if err := json.Unmarshal(message, &resp); err != nil {
 			if s.logging {
 				log.Println("Error unmarshaling response:", err)
@@ -105,7 +105,7 @@ func (s *Client) readMessages() {
 	}
 }
 
-func (s *Client) Request(method string, payload map[string]interface{}) (Response, error) {
+func (s *RPCClient) Request(method string, payload map[string]interface{}) (RPCResponse, error) {
 	id := hashMethodAndPayload(method, payload)
 	req := map[string]interface{}{
 		"id":      id,
@@ -114,7 +114,7 @@ func (s *Client) Request(method string, payload map[string]interface{}) (Respons
 	}
 	reqData, _ := json.Marshal(req)
 	s.mu.Lock()
-	ch := make(chan Response)
+	ch := make(chan RPCResponse)
 	s.requests[id] = ch
 	s.mu.Unlock()
 
@@ -122,7 +122,7 @@ func (s *Client) Request(method string, payload map[string]interface{}) (Respons
 	go func() {
 		defer s.wg.Done()
 		if err := s.conn.WriteMessage(websocket.TextMessage, reqData); err != nil {
-			resp := Response{
+			resp := RPCResponse{
 				Id:    id,
 				Data:  nil,
 				Error: err.Error(),
@@ -143,7 +143,7 @@ func hashMethodAndPayload(method string, payload map[string]interface{}) string 
 	return fmt.Sprintf("%x", data)
 }
 
-func (s *Client) Stop() {
+func (s *RPCClient) Stop() {
 	s.reconnect = false
 	if s.conn != nil && s.connected {
 		message := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")

@@ -5,16 +5,20 @@ import (
 	"reflect"
 )
 
-func HandleAction(a []byte, service interface{}) Response {
+type rpcServer struct{}
+
+var RPCServer = rpcServer{}
+
+func (rpc rpcServer) HandleRPCRequest(a []byte, service interface{}) RPCResponse {
 
 	//check if the action is a valid action
-	action := Action{}
+	action := RPCAction{}
 	if err := json.Unmarshal(a, &action); err != nil {
-		return Response{Data: nil, Error: err.Error(), Id: "not found"}
+		return RPCResponse{Data: nil, Error: err.Error(), Id: "not found"}
 	}
 
 	if action.Method == "" {
-		return Response{Data: nil, Error: "method not found", Id: action.Id}
+		return RPCResponse{Data: nil, Error: "method not found", Id: action.Id}
 	}
 
 	// Obtain the reflection Value of the interface
@@ -23,7 +27,7 @@ func HandleAction(a []byte, service interface{}) Response {
 	// Get the method by name
 	method := val.MethodByName(action.Method)
 	if !method.IsValid() {
-		return Response{Data: nil, Error: "method not found", Id: action.Id}
+		return RPCResponse{Data: nil, Error: "method not found", Id: action.Id}
 	}
 
 	// Prepare input arguments for reflection call
@@ -44,5 +48,5 @@ func HandleAction(a []byte, service interface{}) Response {
 		errStr = ""
 	}
 
-	return Response{Data: ret[0].Interface(), Error: errStr, Id: action.Id}
+	return RPCResponse{Data: ret[0].Interface(), Error: errStr, Id: action.Id}
 }

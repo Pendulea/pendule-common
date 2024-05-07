@@ -1,21 +1,5 @@
 package pcommon
 
-type EmptyStruct struct{}
-
-type RPCAction struct {
-	Id      string                 `json:"id"`
-	Method  string                 `json:"method"`
-	Payload map[string]interface{} `json:"payload"`
-}
-
-type RPCResponse struct {
-	Id    string                 `json:"id"`
-	Data  map[string]interface{} `json:"data"`
-	Error string                 `json:"error"`
-}
-
-type RPCRequest map[string]interface{}
-
 type SetJSON struct {
 	Pair       Pair    `json:"pair"`
 	Consistent bool    `json:"consistent"`

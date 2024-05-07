@@ -11,6 +11,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type RPCRequestPayload map[string]interface{}
+
 type RPCClient struct {
 	conn              *websocket.Conn
 	requests          map[string]chan RPCResponse
@@ -95,9 +97,9 @@ func (s *RPCClient) readMessages() {
 	}
 }
 
-func (s *RPCClient) Request(method string, payload map[string]interface{}) (*RPCResponse, error) {
+func (s *RPCClient) Request(method string, payload RPCRequestPayload) (*RPCResponse, error) {
 	id := hashMethodAndPayload(method, payload)
-	req := map[string]interface{}{
+	req := RPCRequestPayload{
 		"id":      id,
 		"method":  method,
 		"payload": payload,
@@ -128,7 +130,7 @@ func (s *RPCClient) Request(method string, payload map[string]interface{}) (*RPC
 	return &resp, nil
 }
 
-func hashMethodAndPayload(method string, payload map[string]interface{}) string {
+func hashMethodAndPayload(method string, payload RPCRequestPayload) string {
 	payloadData, _ := json.Marshal(payload)
 	data := fmt.Sprintf("%s:%s", method, payloadData)
 

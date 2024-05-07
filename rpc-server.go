@@ -5,6 +5,18 @@ import (
 	"reflect"
 )
 
+type RPCAction struct {
+	Id      string            `json:"id"`
+	Method  string            `json:"method"`
+	Payload RPCRequestPayload `json:"payload"`
+}
+
+type RPCResponse struct {
+	Id    string            `json:"id"`
+	Data  RPCRequestPayload `json:"data"`
+	Error string            `json:"error"`
+}
+
 type rpc struct{}
 
 var RPC = rpc{}

@@ -52,21 +52,6 @@ func (s *RPCClient) Connect() {
 		log.Println("Connection with parser is open")
 	}
 	go s.readMessages()
-	time.Sleep(100 * time.Millisecond)
-	go func() {
-		for {
-			if _, _, err := s.conn.NextReader(); err != nil {
-				s.connected = false
-				if s.reconnect {
-					if s.logging {
-						log.Println("Connection closed:", err)
-					}
-					time.AfterFunc(s.reconnectInterval, s.Connect)
-				}
-				break
-			}
-		}
-	}()
 }
 
 func (s *RPCClient) CheckConnectedError() error {
@@ -81,10 +66,15 @@ func (s *RPCClient) readMessages() {
 	for {
 		_, message, err := s.conn.ReadMessage()
 		if err != nil {
-			s.wg.Done()
-			if s.logging {
-				log.Println("read:", err)
+			s.connected = false
+			s.conn.Close()
+			if s.reconnect {
+				if s.logging {
+					log.Println("Connection closed:", err)
+				}
+				time.AfterFunc(s.reconnectInterval, s.Connect)
 			}
+			s.wg.Done()
 			return
 		}
 
@@ -105,7 +95,7 @@ func (s *RPCClient) readMessages() {
 	}
 }
 
-func (s *RPCClient) Request(method string, payload map[string]interface{}) (RPCResponse, error) {
+func (s *RPCClient) Request(method string, payload map[string]interface{}) (*RPCResponse, error) {
 	id := hashMethodAndPayload(method, payload)
 	req := map[string]interface{}{
 		"id":      id,
@@ -132,7 +122,10 @@ func (s *RPCClient) Request(method string, payload map[string]interface{}) (RPCR
 	}()
 
 	resp := <-ch
-	return resp, nil
+	if resp.Error != "" {
+		return nil, fmt.Errorf(resp.Error)
+	}
+	return &resp, nil
 }
 
 func hashMethodAndPayload(method string, payload map[string]interface{}) string {

@@ -9,9 +9,9 @@ type RPCAction struct {
 }
 
 type RPCResponse struct {
-	Id    string `json:"id"`
-	Data  any    `json:"data"`
-	Error string `json:"error"`
+	Id    string                 `json:"id"`
+	Data  map[string]interface{} `json:"data"`
+	Error string                 `json:"error"`
 }
 
 type RPCRequest map[string]interface{}

@@ -48,5 +48,12 @@ func (rpc rpc) HandleRPCServerRequest(a []byte, service interface{}) RPCResponse
 		errStr = ""
 	}
 
-	return RPCResponse{Data: ret[0].Interface(), Error: errStr, Id: action.Id}
+	//cast data to map[string]interface{}
+	data := ret[0].Interface()
+	var cdata map[string]interface{} = nil
+	if data != nil {
+		cdata = data.(map[string]interface{})
+	}
+
+	return RPCResponse{Data: cdata, Error: errStr, Id: action.Id}
 }

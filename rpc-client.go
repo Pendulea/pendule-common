@@ -112,11 +112,13 @@ func (s *RPCClient) Request(method string, payload RPCRequestPayload) (*RPCRespo
 	s.mu.Unlock()
 
 	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
-		s.writeMu.Lock()         // Lock for writing
-		defer s.writeMu.Unlock() // Unlock after writing
-		if err := s.conn.WriteMessage(websocket.TextMessage, reqData); err != nil {
+	go func(client *RPCClient) {
+		client.writeMu.Lock()
+		defer func() {
+			client.wg.Done()
+			client.writeMu.Unlock()
+		}()
+		if err := client.conn.WriteMessage(websocket.TextMessage, reqData); err != nil {
 			resp := RPCResponse{
 				Id:    id,
 				Data:  nil,
@@ -124,7 +126,7 @@ func (s *RPCClient) Request(method string, payload RPCRequestPayload) (*RPCRespo
 			}
 			ch <- resp
 		}
-	}()
+	}(s)
 
 	resp := <-ch
 	if resp.Error != "" {
@@ -145,7 +147,9 @@ func (s *RPCClient) Stop() {
 	s.reconnect = false
 	if s.conn != nil && s.connected {
 		message := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")
+		s.writeMu.Lock()
 		s.conn.WriteMessage(websocket.CloseMessage, message)
+		s.writeMu.Unlock()
 		s.conn.Close()
 		s.connected = false
 	}

@@ -8,6 +8,100 @@ import (
 	"time"
 )
 
+type Tick struct {
+	Open                float64 `json:"open"`
+	High                float64 `json:"high"`
+	Low                 float64 `json:"low"`
+	Close               float64 `json:"close"`
+	VolumeBought        float64 `json:"volume_bought"`
+	VolumeSold          float64 `json:"volume_sold"`
+	TradeCount          int64   `json:"trade_count"`
+	MedianVolumeBought  float64 `json:"median_volume_bought"`
+	AverageVolumeBought float64 `json:"average_volume_bought"`
+	MedianVolumeSold    float64 `json:"median_volume_sold"`
+	AverageVolumeSold   float64 `json:"average_volume_sold"`
+	VWAP                float64 `json:"vwap"`
+	StandardDeviation   float64 `json:"standard_deviation"`
+}
+
+type TickMap map[int64]Tick
+
+type TickTime struct {
+	Open                float64 `json:"open"`
+	High                float64 `json:"high"`
+	Low                 float64 `json:"low"`
+	Close               float64 `json:"close"`
+	VolumeBought        float64 `json:"volume_bought"`
+	VolumeSold          float64 `json:"volume_sold"`
+	TradeCount          int64   `json:"trade_count"`
+	MedianVolumeBought  float64 `json:"median_volume_bought"`
+	AverageVolumeBought float64 `json:"average_volume_bought"`
+	MedianVolumeSold    float64 `json:"median_volume_sold"`
+	AverageVolumeSold   float64 `json:"average_volume_sold"`
+	VWAP                float64 `json:"vwap"`
+	StandardDeviation   float64 `json:"standard_deviation"`
+	Time                int64   `json:"time"`
+}
+
+type TickArray []Tick
+type TickTimeArray []TickTime
+
+func (t Tick) ToTickTime(time int64) TickTime {
+	return TickTime{
+		Open:                t.Open,
+		High:                t.High,
+		Low:                 t.Low,
+		Close:               t.Close,
+		VolumeBought:        t.VolumeBought,
+		VolumeSold:          t.VolumeSold,
+		TradeCount:          t.TradeCount,
+		MedianVolumeBought:  t.MedianVolumeBought,
+		AverageVolumeBought: t.AverageVolumeBought,
+		MedianVolumeSold:    t.MedianVolumeSold,
+		AverageVolumeSold:   t.AverageVolumeSold,
+		VWAP:                t.VWAP,
+		StandardDeviation:   t.StandardDeviation,
+		Time:                time,
+	}
+}
+
+func (tmap *TickMap) ToTickTimeArray() TickTimeArray {
+	tickTimeArray := make(TickTimeArray, len(*tmap))
+	i := 0
+	for time, tick := range *tmap {
+		tickTimeArray[i] = tick.ToTickTime(time)
+		i++
+	}
+	return tickTimeArray
+}
+
+func (tta *TickTimeArray) Sort(asc bool) TickTimeArray {
+	if asc {
+		ret := make(TickTimeArray, len(*tta))
+		copy(ret, *tta)
+		for i := 0; i < len(ret); i++ {
+			for j := i + 1; j < len(ret); j++ {
+				if ret[i].Time > ret[j].Time {
+					ret[i], ret[j] = ret[j], ret[i]
+				}
+			}
+		}
+		*tta = ret
+	} else {
+		ret := make(TickTimeArray, len(*tta))
+		copy(ret, *tta)
+		for i := 0; i < len(ret); i++ {
+			for j := i + 1; j < len(ret); j++ {
+				if ret[i].Time < ret[j].Time {
+					ret[i], ret[j] = ret[j], ret[i]
+				}
+			}
+		}
+		*tta = ret
+	}
+	return *tta
+}
+
 func (tmap *TickMap) FilterInRange(t0 time.Time, t1 time.Time) TickMap {
 	ret := make(TickMap)
 	for time, tick := range *tmap {
@@ -16,6 +110,13 @@ func (tmap *TickMap) FilterInRange(t0 time.Time, t1 time.Time) TickMap {
 		}
 	}
 	return ret
+}
+
+func (tmap *TickMap) Merge(t TickMap) TickMap {
+	for time, tick := range t {
+		(*tmap)[time] = tick
+	}
+	return *tmap
 }
 
 func (m *TickMap) DeleteInRange(t0 time.Time, t1 time.Time) {

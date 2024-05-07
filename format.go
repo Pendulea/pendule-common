@@ -1,6 +1,7 @@
 package pcommon
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"regexp"
@@ -164,22 +165,18 @@ func (f format) DecodeMapIntoStruct(data map[string]interface{}, result interfac
 }
 
 func (f format) EncodeStructIntoMap(data interface{}) (map[string]interface{}, error) {
-	decoderConfig := &mapstructure.DecoderConfig{
-		Metadata: nil,
-		Result:   data,
-		TagName:  "json", // Set the tag name used in your structs if any, default is none
-	}
-
-	decoder, err := mapstructure.NewDecoder(decoderConfig)
+	// First, marshal the struct into JSON bytes
+	jsonData, err := json.Marshal(data)
 	if err != nil {
 		return nil, err
 	}
 
-	var result map[string]interface{}
-	err = decoder.Decode(&result)
+	// Then, unmarshal JSON bytes into a map
+	var resultMap map[string]interface{}
+	err = json.Unmarshal(jsonData, &resultMap)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	return resultMap, nil
 }

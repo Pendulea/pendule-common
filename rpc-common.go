@@ -64,24 +64,5 @@ type GetCandlesRequest struct {
 }
 
 type GetCandlesResponse struct {
-	Candles TickMap `json:"candles"`
+	Candles TickTimeArray `json:"candles"`
 }
-
-type Tick struct {
-	Open                float64 `json:"open"`
-	High                float64 `json:"high"`
-	Low                 float64 `json:"low"`
-	Close               float64 `json:"close"`
-	VolumeBought        float64 `json:"volume_bought"`
-	VolumeSold          float64 `json:"volume_sold"`
-	TradeCount          int64   `json:"trade_count"`
-	MedianVolumeBought  float64 `json:"median_volume_bought"`
-	AverageVolumeBought float64 `json:"average_volume_bought"`
-	MedianVolumeSold    float64 `json:"median_volume_sold"`
-	AverageVolumeSold   float64 `json:"average_volume_sold"`
-	VWAP                float64 `json:"vwap"`
-	StandardDeviation   float64 `json:"standard_deviation"`
-}
-
-type TickMap map[int64]Tick
-type TickArray []Tick

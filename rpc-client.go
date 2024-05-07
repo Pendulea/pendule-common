@@ -64,12 +64,30 @@ func (s *RPCClient) CheckConnectedError() error {
 	return nil
 }
 
+func (s *RPCClient) closeAllChannels() {
+
+	resp := RPCResponse{
+		Id:    "close",
+		Data:  nil,
+		Error: "connexion is closed",
+	}
+	s.mu.Lock()
+	for id, ch := range s.requests {
+		resp.Id = id
+		ch <- resp
+		close(ch)
+		delete(s.requests, resp.Id)
+	}
+	s.mu.Unlock()
+}
+
 func (s *RPCClient) readMessages() {
 	s.wg.Add(1)
 	for {
 		_, message, err := s.conn.ReadMessage()
 		if err != nil {
 			s.connected = false
+			s.closeAllChannels()
 			s.conn.Close()
 			if s.reconnect {
 				if s.logging {
@@ -145,6 +163,7 @@ func hashMethodAndPayload(method string, payload RPCRequestPayload) string {
 
 func (s *RPCClient) Stop() {
 	s.reconnect = false
+	s.closeAllChannels()
 	if s.conn != nil && s.connected {
 		message := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "")
 		s.writeMu.Lock()

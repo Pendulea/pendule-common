@@ -1,7 +1,5 @@
 package pcommon
 
-var ParserRPCRequests = &parserRPCRequests{}
-
 type parserRPCRequests struct{}
 
 func (rpc *parserRPCRequests) FetchCandleList(parserRPCClient *RPCClient, settings GetCandlesRequest) (TickTimeArray, error) {

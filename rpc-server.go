@@ -2,6 +2,7 @@ package pcommon
 
 import (
 	"encoding/json"
+	"log"
 	"reflect"
 )
 
@@ -17,11 +18,15 @@ type RPCResponse struct {
 	Error string            `json:"error"`
 }
 
-type rpc struct{}
+type rpc struct {
+	ParserRequests parserRPCRequests
+}
 
-var RPC = rpc{}
+var RPC = rpc{
+	ParserRequests: parserRPCRequests{},
+}
 
-func (rpc rpc) HandleRPCServerRequest(a []byte, service interface{}) RPCResponse {
+func (rpc rpc) HandleServerRequest(a []byte, service interface{}) RPCResponse {
 
 	//check if the action is a valid action
 	action := RPCAction{}
@@ -60,12 +65,16 @@ func (rpc rpc) HandleRPCServerRequest(a []byte, service interface{}) RPCResponse
 		errStr = ""
 	}
 
+	if ret[0].IsNil() {
+		return RPCResponse{Data: nil, Error: errStr, Id: action.Id}
+	}
 	//cast data to map[string]interface{}
 	data := ret[0].Interface()
-	var cdata map[string]interface{} = nil
-	if data != nil {
-		cdata = data.(map[string]interface{})
+	data, err := Format.EncodeStructIntoMap(data)
+	if err != nil {
+		log.Panic(err)
 	}
+	cdata := data.(map[string]interface{})
 
 	return RPCResponse{Data: cdata, Error: errStr, Id: action.Id}
 }

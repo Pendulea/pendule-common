@@ -65,6 +65,24 @@ func (t Tick) ToTickTime(time int64) TickTime {
 	}
 }
 
+func (t TickTime) ToTick() Tick {
+	return Tick{
+		Open:                t.Open,
+		High:                t.High,
+		Low:                 t.Low,
+		Close:               t.Close,
+		VolumeBought:        t.VolumeBought,
+		VolumeSold:          t.VolumeSold,
+		TradeCount:          t.TradeCount,
+		MedianVolumeBought:  t.MedianVolumeBought,
+		AverageVolumeBought: t.AverageVolumeBought,
+		MedianVolumeSold:    t.MedianVolumeSold,
+		AverageVolumeSold:   t.AverageVolumeSold,
+		VWAP:                t.VWAP,
+		StandardDeviation:   t.StandardDeviation,
+	}
+}
+
 func (tmap *TickMap) ToTickTimeArray() TickTimeArray {
 	tickTimeArray := make(TickTimeArray, len(*tmap))
 	i := 0
@@ -152,21 +170,21 @@ func (m *TickMap) ToJSON(tick Tick) (string, error) {
 	return string(tickArrayJSON), nil
 }
 
-func (tick Tick) Stringify() string {
+func (tick Tick) Stringify(decimals int) string {
 	ret := ""
-	ret += strconv.FormatFloat(tick.Open, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.High, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.Low, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.Close, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.VolumeBought, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.VolumeSold, 'f', -1, 64) + "|"
+	ret += strconv.FormatFloat(tick.Open, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.High, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.Low, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.Close, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.VolumeBought, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.VolumeSold, 'f', decimals, 64) + "|"
 	ret += strconv.FormatInt(tick.TradeCount, 10) + "|"
-	ret += strconv.FormatFloat(tick.MedianVolumeBought, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.AverageVolumeBought, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.MedianVolumeSold, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.AverageVolumeSold, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.VWAP, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.StandardDeviation, 'f', -1, 64)
+	ret += strconv.FormatFloat(tick.MedianVolumeBought, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.AverageVolumeBought, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.MedianVolumeSold, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.AverageVolumeSold, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.VWAP, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.StandardDeviation, 'f', decimals, 64)
 	return ret
 }
 

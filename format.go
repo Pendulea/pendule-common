@@ -90,7 +90,7 @@ func (f format) LargeNumberToShortString(n int64) string {
 		return fmt.Sprintf("%.2fm", float64(n)/1_000_000)
 	}
 	if n >= 1_000 {
-		return fmt.Sprintf("%.1fm", float64(n)/1_000)
+		return fmt.Sprintf("%.1fk", float64(n)/1_000)
 	}
 
 	return fmt.Sprintf("%d", n)

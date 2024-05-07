@@ -170,21 +170,21 @@ func (m *TickMap) ToJSON(tick Tick) (string, error) {
 	return string(tickArrayJSON), nil
 }
 
-func (tick Tick) Stringify(decimals int) string {
+func (tick Tick) Stringify() string {
 	ret := ""
-	ret += strconv.FormatFloat(tick.Open, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.High, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.Low, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.Close, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.VolumeBought, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.VolumeSold, 'f', decimals, 64) + "|"
+	ret += strconv.FormatFloat(tick.Open, 'f', -1, 64) + "|"
+	ret += strconv.FormatFloat(tick.High, 'f', -1, 64) + "|"
+	ret += strconv.FormatFloat(tick.Low, 'f', -1, 64) + "|"
+	ret += strconv.FormatFloat(tick.Close, 'f', -1, 64) + "|"
+	ret += strconv.FormatFloat(tick.VolumeBought, 'f', 4, 64) + "|"
+	ret += strconv.FormatFloat(tick.VolumeSold, 'f', 4, 64) + "|"
 	ret += strconv.FormatInt(tick.TradeCount, 10) + "|"
-	ret += strconv.FormatFloat(tick.MedianVolumeBought, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.AverageVolumeBought, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.MedianVolumeSold, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.AverageVolumeSold, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.VWAP, 'f', decimals, 64) + "|"
-	ret += strconv.FormatFloat(tick.StandardDeviation, 'f', decimals, 64)
+	ret += strconv.FormatFloat(tick.MedianVolumeBought, 'f', 3, 64) + "|"
+	ret += strconv.FormatFloat(tick.AverageVolumeBought, 'f', 3, 64) + "|"
+	ret += strconv.FormatFloat(tick.MedianVolumeSold, 'f', 3, 64) + "|"
+	ret += strconv.FormatFloat(tick.AverageVolumeSold, 'f', 3, 64) + "|"
+	ret += strconv.FormatFloat(tick.VWAP, 'f', 3, 64) + "|"
+	ret += strconv.FormatFloat(tick.StandardDeviation, 'f', 3, 64)
 	return ret
 }
 

@@ -17,6 +17,7 @@ type RPCClient struct {
 	conn              *websocket.Conn
 	requests          map[string]chan RPCResponse
 	mu                sync.Mutex
+	writeMu           sync.Mutex // Mutex for write operations
 	reconnect         bool
 	connected         bool
 	parserServerURL   string
@@ -113,6 +114,8 @@ func (s *RPCClient) Request(method string, payload RPCRequestPayload) (*RPCRespo
 	s.wg.Add(1)
 	go func() {
 		defer s.wg.Done()
+		s.writeMu.Lock()         // Lock for writing
+		defer s.writeMu.Unlock() // Unlock after writing
 		if err := s.conn.WriteMessage(websocket.TextMessage, reqData); err != nil {
 			resp := RPCResponse{
 				Id:    id,

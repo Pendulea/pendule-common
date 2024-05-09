@@ -126,11 +126,8 @@ func (f format) AccurateHumanize(d time.Duration) string {
 	return d.String()
 }
 
-func (f format) BuildSetID(symbol string, future bool) string {
-	if future {
-		return symbol + FUTURES_KEY
-	}
-	return symbol + SPOT_KEY
+func (f format) BuildSetID(symbol string, tradeType TradeType) string {
+	return symbol + tradeType.Key()
 }
 
 func (f format) CuteHash(s string) string {

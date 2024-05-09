@@ -8,6 +8,22 @@ import (
 	"strings"
 )
 
+type TradeType int8
+
+const SPOT_TRADE TradeType = 1
+const FUTURES_TRADE TradeType = 2
+
+func (t TradeType) Key() string {
+	switch t {
+	case SPOT_TRADE:
+		return "_spot"
+	case FUTURES_TRADE:
+		return "_futures"
+	}
+	log.Fatalf("invalid trade type")
+	return ""
+}
+
 type Pair struct {
 	Binance          bool   `json:"binance"`
 	Symbol0          string `json:"symbol0"`
@@ -17,13 +33,15 @@ type Pair struct {
 	Futures          bool   `json:"futures"`
 }
 
-func (p *Pair) BuildArchiveFolderPath() string {
-	theme := SPOT_KEY
+func (p *Pair) TradeType() TradeType {
 	if p.Futures {
-		theme = FUTURES_KEY
+		return FUTURES_TRADE
 	}
+	return SPOT_TRADE
+}
 
-	path := fmt.Sprintf("%s/%s/%s", Env.ARCHIVES_DIR, p.BuildBinanceSymbol(), theme)
+func (p *Pair) BuildArchiveFolderPath() string {
+	path := fmt.Sprintf("%s/%s/%s", Env.ARCHIVES_DIR, p.BuildBinanceSymbol(), p.TradeType().Key())
 	return path
 }
 
@@ -53,7 +71,7 @@ func (p *Pair) Copy() Pair {
 
 func (p Pair) BuildSetID() string {
 	if p.Binance {
-		return Format.BuildSetID(p.BuildBinanceSymbol(), p.Futures)
+		return Format.BuildSetID(p.BuildBinanceSymbol(), p.TradeType())
 	}
 	return ""
 }

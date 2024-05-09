@@ -17,9 +17,6 @@ const QUARTER = 90 * DAY
 const MIN_TIME_FRAME = time.Second
 const MAX_TIME_FRAME = QUARTER
 
-const FUTURES_KEY = "_futures"
-const SPOT_KEY = "_spot"
-
 type env struct {
 	ARCHIVES_DIR              string
 	DATABASES_DIR             string

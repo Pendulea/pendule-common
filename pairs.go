@@ -3,6 +3,7 @@ package pcommon
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -14,6 +15,25 @@ type Pair struct {
 	MinHistoricalDay string `json:"min_historical_day"`
 	Indicators       string `json:"indicators"`
 	Futures          bool   `json:"futures"`
+}
+
+func (p *Pair) BuildArchiveFolderPath() string {
+	theme := SPOT_KEY
+	if p.Futures {
+		theme = FUTURES_KEY
+	}
+
+	path := fmt.Sprintf("%s/%s/%s", Env.ARCHIVES_DIR, p.BuildBinanceSymbol(), theme)
+	return path
+}
+
+func (p *Pair) BuildArchivesFilePath(date string, ext string) string {
+	fp := p.BuildArchiveFolderPath()
+	symbol := p.BuildBinanceSymbol()
+	if ext != "csv" && ext != "zip" {
+		log.Fatal("invalid extension for archive file")
+	}
+	return fmt.Sprintf("%s/%s-trades-%s.%s", fp, symbol, date, ext)
 }
 
 func (p *Pair) JSON() ([]byte, error) {

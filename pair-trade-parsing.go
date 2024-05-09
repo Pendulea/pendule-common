@@ -4,12 +4,29 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"os"
 	"time"
 
 	"strconv"
 )
+
+type TradeType int8
+
+const SPOT_TRADE TradeType = 1
+const FUTURES_TRADE TradeType = 2
+
+func (t TradeType) Key() string {
+	switch t {
+	case SPOT_TRADE:
+		return "_spot"
+	case FUTURES_TRADE:
+		return "_futures"
+	}
+	log.Fatalf("invalid trade type")
+	return ""
+}
 
 // Trade represents a trade in the system.
 type Trade struct {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
 	"strings"
 )
 
@@ -36,6 +37,11 @@ func (p *Pair) BuildArchivesFilePath(date string, ext string) string {
 		log.Fatal("invalid extension for archive file")
 	}
 	return fmt.Sprintf("%s/%s-trades-%s.%s", fp, symbol, date, ext)
+}
+
+func (p *Pair) BuildDBPath() string {
+	dbPath := filepath.Join(Env.DATABASES_DIR, strings.ToLower(p.BuildSetID()))
+	return dbPath
 }
 
 func (p *Pair) JSON() ([]byte, error) {

@@ -1,4 +1,4 @@
-module github.com/pandulea/pendule-common
+module github.com/pendulea/pendule-common
 
 go 1.19
 

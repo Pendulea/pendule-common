@@ -1,9 +1,14 @@
 package pcommon
 
 type SetJSON struct {
-	Pair       Pair    `json:"pair"`
-	Consistent bool    `json:"consistent"`
-	Timeframes []int64 `json:"timeframes"`
+	Pair            Pair     `json:"pair"`
+	Inconsistencies []string `json:"inconsistencies"`
+	SetSize         int64    `json:"set_size"`
+	Timeframes      []int64  `json:"timeframes"`
+}
+
+func (s *SetJSON) IsConsistent() bool {
+	return len(s.Inconsistencies) == 0
 }
 
 // Request represents the parameters of the RPC request.

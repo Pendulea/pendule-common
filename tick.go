@@ -45,7 +45,7 @@ type TickTime struct {
 
 type TickTimeArray []TickTime
 
-func (t Tick) ToTickTime(time int64) TickTime {
+func (t *Tick) ToTickTime(time int64) TickTime {
 	return TickTime{
 		Open:                t.Open,
 		High:                t.High,
@@ -64,7 +64,7 @@ func (t Tick) ToTickTime(time int64) TickTime {
 	}
 }
 
-func (t TickTime) ToTick() Tick {
+func (t *TickTime) ToTick() Tick {
 	return Tick{
 		Open:                t.Open,
 		High:                t.High,
@@ -82,14 +82,14 @@ func (t TickTime) ToTick() Tick {
 	}
 }
 
-func (tmap *TickMap) ToTickTimeArray() TickTimeArray {
+func (tmap *TickMap) ToTickTimeArray() *TickTimeArray {
 	tickTimeArray := make(TickTimeArray, len(*tmap))
 	i := 0
 	for time, tick := range *tmap {
 		tickTimeArray[i] = tick.ToTickTime(time)
 		i++
 	}
-	return tickTimeArray
+	return &tickTimeArray
 }
 
 func (tta *TickTimeArray) Sort(asc bool) TickTimeArray {
@@ -144,24 +144,8 @@ func (m *TickMap) DeleteInRange(t0 time.Time, t1 time.Time) {
 	}
 }
 
-func (m *TickMap) ToJSON(tick Tick) (string, error) {
-	type ITickWithTime struct {
-		Tick
-		Time int64 `json:"time"`
-	}
-
-	var tickArray []ITickWithTime = make([]ITickWithTime, len(*m))
-
-	i := 0
-	for time, tick := range *m {
-		tickArray[i] = ITickWithTime{
-			Tick: tick,
-			Time: time,
-		}
-		i++
-	}
-
-	tickArrayJSON, err := json.Marshal(tickArray)
+func (list *TickTime) ToJSON(tick Tick) (string, error) {
+	tickArrayJSON, err := json.Marshal(*list)
 	if err != nil {
 		return "", err
 	}

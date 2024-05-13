@@ -43,7 +43,6 @@ type TickTime struct {
 	Time                int64   `json:"time"`
 }
 
-type TickArray []Tick
 type TickTimeArray []TickTime
 
 func (t Tick) ToTickTime(time int64) TickTime {
@@ -221,7 +220,7 @@ func ParseTick(str string) Tick {
 	}
 }
 
-func (candles TickArray) AggregateCandlesToCandle() Tick {
+func (candles TickTimeArray) AggregateCandlesToCandle() Tick {
 
 	aggregateCandle := Tick{
 		Open:                candles[0].Open,
@@ -263,7 +262,7 @@ func (candles TickArray) AggregateCandlesToCandle() Tick {
 	return aggregateCandle
 }
 
-func (candles TickArray) calculateVWAP() float64 {
+func (candles TickTimeArray) calculateVWAP() float64 {
 	if len(candles) == 0 {
 		return 0.0 // VWAP is not defined if there are no trades.
 	}

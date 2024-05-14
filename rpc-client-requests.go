@@ -26,6 +26,28 @@ func (rpc *parserRPCRequests) FetchCandleList(parserRPCClient *RPCClient, settin
 	return responseJSON.Candles, nil
 }
 
+func (rpc *parserRPCRequests) FetchIndexes(parserRPCClient *RPCClient, settings GetIndexesRequest) (*GetIndexesResponse, error) {
+	if err := parserRPCClient.CheckConnectedError(); err != nil {
+		return nil, err
+	}
+
+	reqMap, err := Format.EncodeStructIntoMap(&settings)
+	if err != nil {
+		return nil, err
+	}
+	res, err := parserRPCClient.Request("GetIndexes", reqMap)
+	if err != nil {
+		return nil, err
+	}
+	responseJSON := GetIndexesResponse{}
+
+	if err := Format.DecodeMapIntoStruct(res.Data, &responseJSON); err != nil {
+		return nil, err
+	}
+
+	return &responseJSON, nil
+}
+
 func (rpc *parserRPCRequests) FetchAvailablePairSetList(parserRPCClient *RPCClient) ([]SetJSON, error) {
 	if err := parserRPCClient.CheckConnectedError(); err != nil {
 		return nil, err
@@ -84,22 +106,25 @@ func (rpc *parserRPCRequests) AddTimeframe(parserRPCClient *RPCClient, settings 
 	return fmt.Errorf("failed to schedule")
 }
 
-func (rpc *parserRPCRequests) RemoveTimeframe(parserRPCClient *RPCClient, settings RemoveTimeFrameRequest) (int, error) {
+func (rpc *parserRPCRequests) RemoveTimeframe(parserRPCClient *RPCClient, settings RemoveTimeFrameRequest) (bool, error) {
 	if err := parserRPCClient.CheckConnectedError(); err != nil {
-		return 0, err
+		return false, err
 	}
 
 	reqMap, err := Format.EncodeStructIntoMap(&settings)
 	if err != nil {
-		return 0, err
+		return false, err
 	}
 
 	res, err := parserRPCClient.Request("RemoveTimeframe", reqMap)
 	if err != nil {
-		return 0, err
+		return false, err
 	}
 
 	resp := RemoveTimeFrameResponse{}
 	Format.DecodeMapIntoStruct(res.Data, &resp)
-	return resp.Count, nil
+	if !resp.Scheduled {
+		return false, fmt.Errorf("failed to schedule")
+	}
+	return true, nil
 }

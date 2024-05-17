@@ -24,6 +24,82 @@ type Tick struct {
 	StandardDeviation   float64 `json:"standard_deviation"`
 }
 
+func (t *Tick) OpenString() string {
+	return strconv.FormatFloat(t.Open, 'f', -1, 64)
+}
+
+func (t *Tick) HighString() string {
+	return strconv.FormatFloat(t.High, 'f', -1, 64)
+}
+
+func (t *Tick) LowString() string {
+	return strconv.FormatFloat(t.Low, 'f', -1, 64)
+}
+
+func (t *Tick) CloseString() string {
+	return strconv.FormatFloat(t.Close, 'f', -1, 64)
+}
+
+func (t *Tick) VolumeBoughtString() string {
+	if t.VolumeBought == 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(t.VolumeBought, 'f', 3, 64)
+}
+
+func (t *Tick) VolumeSoldString() string {
+	if t.VolumeSold == 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(t.VolumeSold, 'f', 3, 64)
+}
+
+func (t *Tick) TradeCountString() string {
+	return strconv.FormatInt(t.TradeCount, 10)
+}
+
+func (t *Tick) MedianVolumeBoughtString() string {
+	if t.MedianVolumeBought == 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(t.MedianVolumeBought, 'f', 3, 64)
+}
+
+func (t *Tick) AverageVolumeBoughtString() string {
+	if t.AverageVolumeBought == 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(t.AverageVolumeBought, 'f', 3, 64)
+}
+
+func (t *Tick) MedianVolumeSoldString() string {
+	if t.MedianVolumeSold == 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(t.MedianVolumeSold, 'f', 3, 64)
+}
+
+func (t *Tick) AverageVolumeSoldString() string {
+	if t.AverageVolumeSold == 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(t.AverageVolumeSold, 'f', 3, 64)
+}
+
+func (t *Tick) VWAPString() string {
+	if t.VWAP == 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(t.VWAP, 'f', 3, 64)
+}
+
+func (t *Tick) StandardDeviationString() string {
+	if t.StandardDeviation == 0 {
+		return "0"
+	}
+	return strconv.FormatFloat(t.StandardDeviation, 'f', 3, 64)
+}
+
 type TickMap map[int64]Tick
 
 type TickTime struct {

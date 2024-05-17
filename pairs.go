@@ -14,7 +14,6 @@ type Pair struct {
 	Symbol0          string `json:"symbol0"`
 	Symbol1          string `json:"symbol1"`
 	MinHistoricalDay string `json:"min_historical_day"`
-	Indicators       string `json:"indicators"`
 	Futures          bool   `json:"futures"`
 }
 
@@ -53,7 +52,6 @@ func (p *Pair) Copy() Pair {
 		Binance:          p.Binance,
 		Symbol0:          p.Symbol0,
 		Symbol1:          p.Symbol1,
-		Indicators:       p.Indicators,
 		MinHistoricalDay: p.MinHistoricalDay,
 		Futures:          p.Futures,
 	}

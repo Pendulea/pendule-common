@@ -259,3 +259,25 @@ func DirSize(path string) (int64, error) {
 	})
 	return size, err
 }
+
+func GetFolderSize(folderPath string) (int64, error) {
+	var totalSize int64
+
+	// Walk through the folder and its subdirectories
+	err := filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		// Add the size of regular files to the total
+		if !info.IsDir() {
+			totalSize += info.Size()
+		}
+		return nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return totalSize, nil
+}

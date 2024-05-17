@@ -6,9 +6,9 @@ type IndicatorJSON struct {
 }
 
 type TimeframeJSON struct {
-	Timeframe     int64 `json:"timeframe"`
-	LastIndexTime int64 `json:"last_index_time"`
-	Indicators    []IndicatorJSON
+	Timeframe     int64           `json:"timeframe"`
+	LastIndexTime int64           `json:"last_index_time"`
+	Indicators    []IndicatorJSON `json:"indicators"`
 }
 
 type SetJSON struct {

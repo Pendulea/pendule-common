@@ -123,7 +123,16 @@ func (f format) AccurateHumanize(d time.Duration) string {
 		}
 		return fmt.Sprintf("%dh%dm", hour, min)
 	}
-	return d.String()
+	if d < DAY*4 {
+		hour := int(d.Hours())
+		return fmt.Sprintf("%dh", hour)
+	}
+	if d < WEEK*4 {
+		days := int(d.Hours() / 24)
+		return fmt.Sprintf("%dd", days)
+	}
+	weeks := int(d.Hours() / 24 / 7)
+	return fmt.Sprintf("%dw", weeks)
 }
 
 func (f format) BuildSetID(symbol string, tradeType TradeType) string {

@@ -246,20 +246,6 @@ func (f file) ListenPairJSONFileChange(pairsPath string, callback func(path stri
 	select {}
 }
 
-func DirSize(path string) (int64, error) {
-	var size int64
-	err := filepath.Walk(path, func(_ string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			size += info.Size()
-		}
-		return err
-	})
-	return size, err
-}
-
 func GetFolderSize(folderPath string) (int64, error) {
 	var totalSize int64
 
@@ -280,4 +266,115 @@ func GetFolderSize(folderPath string) (int64, error) {
 	}
 
 	return totalSize, nil
+}
+
+type FileInfo struct {
+	Name string `json:"name"`
+	Time int64  `json:"time"`
+	Size int64  `json:"size"`
+}
+
+func GetSortedFilenamesByDate(directoryPath string) ([]FileInfo, error) {
+	// Read all files in the directory
+	files, err := os.ReadDir(directoryPath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a slice to hold file info
+	var fileInfos []FileInfo
+
+	for _, file := range files {
+		if !file.IsDir() {
+			filePath := filepath.Join(directoryPath, file.Name())
+			fileInfo, err := os.Stat(filePath)
+			if err != nil {
+				return nil, err
+			}
+			fileInfos = append(fileInfos, FileInfo{Name: file.Name(), Time: fileInfo.ModTime().Unix(), Size: fileInfo.Size()})
+		}
+	}
+
+	// Sort files by modification time in descending order
+	sort.Slice(fileInfos, func(i, j int) bool {
+		return fileInfos[i].Time > fileInfos[j].Time
+	})
+
+	return fileInfos, nil
+}
+
+func addFileToZip(zipWriter *zip.Writer, filePath string, basePath string) error {
+	// Open the file to be added
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Get file information
+	fileInfo, err := file.Stat()
+	if err != nil {
+		return err
+	}
+
+	// Create a zip header from the file information
+	header, err := zip.FileInfoHeader(fileInfo)
+	if err != nil {
+		return err
+	}
+
+	// Set the header name to be the relative path from the base path
+	header.Name, err = filepath.Rel(basePath, filePath)
+	if err != nil {
+		return err
+	}
+
+	// If the file is a directory, ensure the zip entry reflects that
+	if fileInfo.IsDir() {
+		header.Name += "/"
+	} else {
+		header.Method = zip.Deflate
+	}
+
+	// Create the zip file entry
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+
+	// If the file is a directory, return now
+	if fileInfo.IsDir() {
+		return nil
+	}
+
+	// Copy the file data to the zip entry
+	_, err = io.Copy(writer, file)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ZipDirectory(source string, target string) error {
+	// Create a file to write the zip archive to
+	zipFile, err := os.Create(target)
+	if err != nil {
+		return err
+	}
+	defer zipFile.Close()
+
+	// Create a new zip archive writer
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Walk the directory tree and add each file to the zip archive
+	err = filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		return addFileToZip(zipWriter, path, source)
+	})
+
+	return err
 }

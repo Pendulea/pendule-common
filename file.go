@@ -246,7 +246,7 @@ func (f file) ListenPairJSONFileChange(pairsPath string, callback func(path stri
 	select {}
 }
 
-func GetFolderSize(folderPath string) (int64, error) {
+func (f file) GetFolderSize(folderPath string) (int64, error) {
 	var totalSize int64
 
 	// Walk through the folder and its subdirectories
@@ -274,7 +274,7 @@ type FileInfo struct {
 	Size int64  `json:"size"`
 }
 
-func GetSortedFilenamesByDate(directoryPath string) ([]FileInfo, error) {
+func (f file) GetSortedFilenamesByDate(directoryPath string) ([]FileInfo, error) {
 	// Read all files in the directory
 	files, err := os.ReadDir(directoryPath)
 	if err != nil {
@@ -356,7 +356,7 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, basePath string) error
 	return nil
 }
 
-func ZipDirectory(source string, target string) error {
+func (f file) ZipDirectory(source string, target string) error {
 	// Create a file to write the zip archive to
 	zipFile, err := os.Create(target)
 	if err != nil {

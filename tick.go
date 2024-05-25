@@ -25,17 +25,13 @@ type Tick struct {
 }
 
 func formatFloat(val float64, precision int8) string {
+	// Format the float with the specified precision
 	str := strconv.FormatFloat(val, 'f', int(precision), 64)
-	if precision > 0 {
-		// Remove trailing zeros
-		for str[len(str)-1] == '0' {
-			str = str[:len(str)-1]
-		}
-		// Remove trailing dot, if any
-		if str[len(str)-1] == '.' {
-			str = str[:len(str)-1]
-		}
-	}
+
+	// Remove trailing zeros and the decimal point if it's not needed
+	str = strings.TrimRight(str, "0")
+	str = strings.TrimRight(str, ".")
+
 	return str
 }
 

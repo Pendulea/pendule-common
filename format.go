@@ -58,14 +58,14 @@ func (f format) StrDateToDate(dateStr string) (time.Time, error) {
 
 // FormatDateStr formats a time.Time object to a string
 func (f format) FormatDateStr(date time.Time) string {
-	return date.Format("2006-01-02")
+	return date.UTC().Format("2006-01-02")
 }
 
 // BuildDateStr computes a date string from days ago
 func (f format) BuildDateStr(daysAgo int) string {
 	now := time.Now()
 	pastDate := now.AddDate(0, 0, -daysAgo)
-	return pastDate.Format("2006-01-02")
+	return f.FormatDateStr(pastDate)
 }
 
 // LargeBytesToShortString converts byte size to a human-readable string

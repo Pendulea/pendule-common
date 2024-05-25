@@ -24,73 +24,89 @@ type Tick struct {
 	StandardDeviation   float64 `json:"standard_deviation"`
 }
 
+func formatFloat(val float64, precision int8) string {
+	str := strconv.FormatFloat(val, 'f', int(precision), 64)
+	if precision > 0 {
+		// Remove trailing zeros
+		for str[len(str)-1] == '0' {
+			str = str[:len(str)-1]
+		}
+		// Remove trailing dot, if any
+		if str[len(str)-1] == '.' {
+			str = str[:len(str)-1]
+		}
+	}
+	return str
+}
+
 func (t *Tick) OpenString() string {
-	return strconv.FormatFloat(t.Open, 'f', -1, 64)
+	return formatFloat(t.Open, -1)
 }
 
 func (t *Tick) HighString() string {
-	return strconv.FormatFloat(t.High, 'f', -1, 64)
+	return formatFloat(t.High, -1)
 }
 
 func (t *Tick) LowString() string {
-	return strconv.FormatFloat(t.Low, 'f', -1, 64)
+	return formatFloat(t.Low, -1)
 }
 
 func (t *Tick) CloseString() string {
-	return strconv.FormatFloat(t.Close, 'f', -1, 64)
+	return formatFloat(t.Close, -1)
 }
 
-func (t *Tick) VolumeBoughtString() string {
+func (t *Tick) VolumeBoughtString(decimals int8) string {
 	if t.VolumeBought == 0 {
 		return "0"
 	}
-	return strconv.FormatFloat(t.VolumeBought, 'f', 3, 64)
+	return formatFloat(t.VolumeBought, decimals)
 }
 
-func (t *Tick) VolumeSoldString() string {
+func (t *Tick) VolumeSoldString(decimals int8) string {
 	if t.VolumeSold == 0 {
 		return "0"
 	}
-	return strconv.FormatFloat(t.VolumeSold, 'f', 3, 64)
+	return formatFloat(t.VolumeSold, decimals)
 }
 
 func (t *Tick) TradeCountString() string {
 	return strconv.FormatInt(t.TradeCount, 10)
 }
 
-func (t *Tick) MedianVolumeBoughtString() string {
+func (t *Tick) MedianVolumeBoughtString(decimals int8) string {
 	if t.MedianVolumeBought == 0 {
 		return "0"
 	}
-	return strconv.FormatFloat(t.MedianVolumeBought, 'f', 3, 64)
+	return formatFloat(t.MedianVolumeBought, decimals)
 }
 
-func (t *Tick) AverageVolumeBoughtString() string {
+func (t *Tick) AverageVolumeBoughtString(decimals int8) string {
 	if t.AverageVolumeBought == 0 {
 		return "0"
 	}
-	return strconv.FormatFloat(t.AverageVolumeBought, 'f', 3, 64)
+	return formatFloat(t.AverageVolumeBought, decimals)
 }
 
-func (t *Tick) MedianVolumeSoldString() string {
+func (t *Tick) MedianVolumeSoldString(decimals int8) string {
 	if t.MedianVolumeSold == 0 {
 		return "0"
 	}
-	return strconv.FormatFloat(t.MedianVolumeSold, 'f', 3, 64)
+	return formatFloat(t.MedianVolumeSold, decimals)
 }
 
-func (t *Tick) AverageVolumeSoldString() string {
+func (t *Tick) AverageVolumeSoldString(decimals int8) string {
 	if t.AverageVolumeSold == 0 {
 		return "0"
 	}
-	return strconv.FormatFloat(t.AverageVolumeSold, 'f', 3, 64)
+	return formatFloat(t.AverageVolumeSold, decimals)
 }
 
 func (t *Tick) VWAPString() string {
 	if t.VWAP == 0 {
 		return "0"
 	}
-	return strconv.FormatFloat(t.VWAP, 'f', 3, 64)
+
+	return strconv.FormatFloat(t.VWAP, 'f', 5, 64)
 }
 
 func (t *Tick) StandardDeviationString() string {

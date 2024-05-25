@@ -14,7 +14,15 @@ type Pair struct {
 	Symbol0          string `json:"symbol0"`
 	Symbol1          string `json:"symbol1"`
 	MinHistoricalDay string `json:"min_historical_day"`
+	VolumeDecimals   int8   `json:"volume_decimals"`
 	Futures          bool   `json:"futures"`
+}
+
+func (p *Pair) GetVolumeDecimals() int8 {
+	if p.VolumeDecimals == 0 {
+		return 4
+	}
+	return p.VolumeDecimals
 }
 
 func (p *Pair) TradeType() TradeType {
@@ -54,6 +62,7 @@ func (p *Pair) Copy() Pair {
 		Symbol1:          p.Symbol1,
 		MinHistoricalDay: p.MinHistoricalDay,
 		Futures:          p.Futures,
+		VolumeDecimals:   p.VolumeDecimals,
 	}
 }
 

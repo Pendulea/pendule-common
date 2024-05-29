@@ -2,6 +2,7 @@ package pcommon
 
 import (
 	"encoding/json"
+	"log"
 	"math"
 	"strconv"
 	"strings"
@@ -267,6 +268,19 @@ func ParseTick(str string) Tick {
 	}
 }
 
+func getPrecision(val float64) int {
+	// Convert the float64 to a string with high precision
+	str := Format.Float(val, -1)
+	// Find the position of the decimal point
+	decimalPos := strings.Index(str, ".")
+	if decimalPos == -1 {
+		// No decimal point found, so the precision is 0
+		return 0
+	}
+	// The precision is the number of characters after the decimal point
+	return len(str) - decimalPos - 1
+}
+
 func (candles TickTimeArray) AggregateCandlesToCandle() Tick {
 
 	aggregateCandle := Tick{
@@ -296,7 +310,17 @@ func (candles TickTimeArray) AggregateCandlesToCandle() Tick {
 		aggregateCandle.TradeCount += c.TradeCount
 		tradeVolumesBought = append(tradeVolumesBought, c.VolumeBought)
 		tradeVolumesSold = append(tradeVolumesSold, c.VolumeSold)
-		aggregateCandle.AbsolutePriceSum += c.AbsolutePriceSum
+
+		if aggregateCandle.AbsolutePriceSum <= 0 {
+			aggregateCandle.AbsolutePriceSum = c.AbsolutePriceSum
+		} else {
+			precision := getPrecision(aggregateCandle.AbsolutePriceSum)
+			f, err := strconv.ParseFloat(Format.Float(aggregateCandle.AbsolutePriceSum+c.AbsolutePriceSum, int8(precision)), 64)
+			if err != nil {
+				log.Fatal(err)
+			}
+			aggregateCandle.AbsolutePriceSum = f
+		}
 	}
 
 	aggregateCandle.MedianVolumeBought = Math.SafeMedian(tradeVolumesBought)

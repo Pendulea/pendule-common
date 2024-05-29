@@ -2,12 +2,9 @@ package pcommon
 
 import (
 	"encoding/json"
-	"math"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/shopspring/decimal"
 )
 
 type Tick struct {
@@ -269,74 +266,7 @@ func ParseTick(str string) Tick {
 	}
 }
 
-func getPrecision(val float64) int {
-	// Convert the float64 to a string with high precision
-	str := Format.Float(val, -1)
-	// Find the position of the decimal point
-	decimalPos := strings.Index(str, ".")
-	if decimalPos == -1 {
-		// No decimal point found, so the precision is 0
-		return 0
-	}
-	// The precision is the number of characters after the decimal point
-	return len(str) - decimalPos - 1
-}
-
-func (candles TickTimeArray) AggregateCandlesToCandle() Tick {
-
-	aggregateCandle := Tick{
-		Open:                candles[0].Open,
-		High:                candles[0].High,
-		Low:                 candles[0].Low,
-		Close:               candles[len(candles)-1].Close,
-		VolumeBought:        0,
-		VolumeSold:          0,
-		TradeCount:          0,
-		MedianVolumeBought:  0,
-		AverageVolumeBought: 0,
-		MedianVolumeSold:    0,
-		AverageVolumeSold:   0,
-		VWAP:                0,
-		StandardDeviation:   0,
-		AbsolutePriceSum:    0,
-	}
-
-	tradeVolumesBought := []float64{}
-	tradeVolumesSold := []float64{}
-	for _, c := range candles {
-		aggregateCandle.High = math.Max(aggregateCandle.High, c.High)
-		aggregateCandle.Low = math.Min(aggregateCandle.Low, c.Low)
-		aggregateCandle.VolumeBought += c.VolumeBought
-		aggregateCandle.VolumeSold += c.VolumeSold
-		aggregateCandle.TradeCount += c.TradeCount
-		tradeVolumesBought = append(tradeVolumesBought, c.VolumeBought)
-		tradeVolumesSold = append(tradeVolumesSold, c.VolumeSold)
-
-		if aggregateCandle.AbsolutePriceSum <= 0 {
-			aggregateCandle.AbsolutePriceSum = c.AbsolutePriceSum
-		} else {
-			precision := getPrecision(aggregateCandle.AbsolutePriceSum)
-			currentAPS := decimal.NewFromFloat(aggregateCandle.AbsolutePriceSum)
-			additionalAPS := decimal.NewFromFloat(c.AbsolutePriceSum)
-			sumAPS := currentAPS.Add(additionalAPS)
-			// Setting the precision for the sum
-			aggregateCandle.AbsolutePriceSum, _ = sumAPS.Round(int32(precision)).Float64()
-		}
-
-	}
-
-	aggregateCandle.MedianVolumeBought = Math.SafeMedian(tradeVolumesBought)
-	aggregateCandle.MedianVolumeSold = Math.SafeMedian(tradeVolumesSold)
-	aggregateCandle.AverageVolumeBought = Math.SafeAverage(tradeVolumesBought)
-	aggregateCandle.AverageVolumeSold = Math.SafeAverage(tradeVolumesSold)
-
-	aggregateCandle.VWAP = candles.calculateVWAP()
-	aggregateCandle.StandardDeviation = Math.CalculateStandardDeviation(append(tradeVolumesBought, tradeVolumesSold...))
-
-	return aggregateCandle
-}
-
-func (candles TickTimeArray) calculateVWAP() float64 {
+func (candles TickTimeArray) CalculateVWAP() float64 {
 	if len(candles) == 0 {
 		return 0.0 // VWAP is not defined if there are no trades.
 	}

@@ -2,11 +2,12 @@ package pcommon
 
 import (
 	"encoding/json"
-	"log"
 	"math"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/shopspring/decimal"
 )
 
 type Tick struct {
@@ -315,12 +316,13 @@ func (candles TickTimeArray) AggregateCandlesToCandle() Tick {
 			aggregateCandle.AbsolutePriceSum = c.AbsolutePriceSum
 		} else {
 			precision := getPrecision(aggregateCandle.AbsolutePriceSum)
-			f, err := strconv.ParseFloat(Format.Float(aggregateCandle.AbsolutePriceSum+c.AbsolutePriceSum, int8(precision)), 64)
-			if err != nil {
-				log.Fatal(err)
-			}
-			aggregateCandle.AbsolutePriceSum = f
+			currentAPS := decimal.NewFromFloat(aggregateCandle.AbsolutePriceSum)
+			additionalAPS := decimal.NewFromFloat(c.AbsolutePriceSum)
+			sumAPS := currentAPS.Add(additionalAPS)
+			// Setting the precision for the sum
+			aggregateCandle.AbsolutePriceSum, _ = sumAPS.Round(int32(precision)).Float64()
 		}
+
 	}
 
 	aggregateCandle.MedianVolumeBought = Math.SafeMedian(tradeVolumesBought)

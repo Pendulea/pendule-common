@@ -22,6 +22,7 @@ type Tick struct {
 	AverageVolumeSold   float64 `json:"average_volume_sold"`
 	VWAP                float64 `json:"vwap"`
 	StandardDeviation   float64 `json:"standard_deviation"`
+	AbsolutePriceSum    float64 `json:"absolute_price_sum"`
 }
 
 func formatFloat(val float64, precision int8) string {
@@ -49,6 +50,10 @@ func (t *Tick) LowString() string {
 
 func (t *Tick) CloseString() string {
 	return formatFloat(t.Close, -1)
+}
+
+func (t *Tick) AbsolutePriceSumString() string {
+	return formatFloat(t.AbsolutePriceSum, -1)
 }
 
 func (t *Tick) VolumeBoughtString(decimals int8) string {
@@ -102,7 +107,7 @@ func (t *Tick) VWAPString() string {
 		return "0"
 	}
 
-	return strconv.FormatFloat(t.VWAP, 'f', 5, 64)
+	return formatFloat(t.VWAP, 5)
 }
 
 func (t *Tick) StandardDeviationString() string {
@@ -128,6 +133,8 @@ type TickTime struct {
 	AverageVolumeSold   float64 `json:"average_volume_sold"`
 	VWAP                float64 `json:"vwap"`
 	StandardDeviation   float64 `json:"standard_deviation"`
+	AbsolutePriceSum    float64 `json:"absolute_price_sum"`
+	AbsolumeVolumeSum   float64 `json:"absolute_volume_sum"`
 	Time                int64   `json:"time"`
 }
 
@@ -148,6 +155,7 @@ func (t *Tick) ToTickTime(time int64) TickTime {
 		AverageVolumeSold:   t.AverageVolumeSold,
 		VWAP:                t.VWAP,
 		StandardDeviation:   t.StandardDeviation,
+		AbsolutePriceSum:    t.AbsolutePriceSum,
 		Time:                time,
 	}
 }
@@ -167,6 +175,7 @@ func (t *TickTime) ToTick() Tick {
 		AverageVolumeSold:   t.AverageVolumeSold,
 		VWAP:                t.VWAP,
 		StandardDeviation:   t.StandardDeviation,
+		AbsolutePriceSum:    t.AbsolutePriceSum,
 	}
 }
 
@@ -241,21 +250,22 @@ func (list *TickTime) ToJSON(tick Tick) (string, error) {
 	return string(tickArrayJSON), nil
 }
 
-func (tick Tick) Stringify() string {
+func (tick Tick) Stringify(decimals int8) string {
 	ret := ""
-	ret += strconv.FormatFloat(tick.Open, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.High, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.Low, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.Close, 'f', -1, 64) + "|"
-	ret += strconv.FormatFloat(tick.VolumeBought, 'f', 4, 64) + "|"
-	ret += strconv.FormatFloat(tick.VolumeSold, 'f', 4, 64) + "|"
+	ret += formatFloat(tick.Open, -1) + "|"
+	ret += formatFloat(tick.High, -1) + "|"
+	ret += formatFloat(tick.Low, -1) + "|"
+	ret += formatFloat(tick.Close, -1) + "|"
+	ret += formatFloat(tick.VolumeBought, decimals) + "|"
+	ret += formatFloat(tick.VolumeSold, decimals) + "|"
 	ret += strconv.FormatInt(tick.TradeCount, 10) + "|"
-	ret += strconv.FormatFloat(tick.MedianVolumeBought, 'f', 3, 64) + "|"
-	ret += strconv.FormatFloat(tick.AverageVolumeBought, 'f', 3, 64) + "|"
-	ret += strconv.FormatFloat(tick.MedianVolumeSold, 'f', 3, 64) + "|"
-	ret += strconv.FormatFloat(tick.AverageVolumeSold, 'f', 3, 64) + "|"
-	ret += strconv.FormatFloat(tick.VWAP, 'f', 3, 64) + "|"
-	ret += strconv.FormatFloat(tick.StandardDeviation, 'f', 3, 64)
+	ret += formatFloat(tick.MedianVolumeBought, decimals) + "|"
+	ret += formatFloat(tick.AverageVolumeBought, decimals) + "|"
+	ret += formatFloat(tick.MedianVolumeSold, decimals) + "|"
+	ret += formatFloat(tick.AverageVolumeSold, decimals) + "|"
+	ret += formatFloat(tick.VWAP, 5) + "|"
+	ret += formatFloat(tick.StandardDeviation, 3)
+	ret += formatFloat(tick.AbsolutePriceSum, -1) + "|"
 	return ret
 }
 
@@ -274,6 +284,7 @@ func ParseTick(str string) Tick {
 	averageVolumeSold, _ := strconv.ParseFloat(split[10], 64)
 	vwap, _ := strconv.ParseFloat(split[11], 64)
 	standardDeviation, _ := strconv.ParseFloat(split[12], 64)
+	absolutePriceSum, _ := strconv.ParseFloat(split[13], 64)
 
 	return Tick{
 		Open:                open,
@@ -289,6 +300,7 @@ func ParseTick(str string) Tick {
 		AverageVolumeSold:   averageVolumeSold,
 		VWAP:                vwap,
 		StandardDeviation:   standardDeviation,
+		AbsolutePriceSum:    absolutePriceSum,
 	}
 }
 
@@ -308,6 +320,7 @@ func (candles TickTimeArray) AggregateCandlesToCandle() Tick {
 		AverageVolumeSold:   0,
 		VWAP:                0,
 		StandardDeviation:   0,
+		AbsolutePriceSum:    0,
 	}
 
 	tradeVolumesBought := []float64{}

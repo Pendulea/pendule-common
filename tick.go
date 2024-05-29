@@ -53,6 +53,9 @@ func (t *Tick) CloseString() string {
 }
 
 func (t *Tick) AbsolutePriceSumString() string {
+	if t.VolumeSold == 0 {
+		return "0"
+	}
 	return formatFloat(t.AbsolutePriceSum, -1)
 }
 
@@ -134,7 +137,6 @@ type TickTime struct {
 	VWAP                float64 `json:"vwap"`
 	StandardDeviation   float64 `json:"standard_deviation"`
 	AbsolutePriceSum    float64 `json:"absolute_price_sum"`
-	AbsolumeVolumeSum   float64 `json:"absolute_volume_sum"`
 	Time                int64   `json:"time"`
 }
 

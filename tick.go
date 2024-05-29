@@ -53,23 +53,14 @@ func (t *Tick) CloseString() string {
 }
 
 func (t *Tick) AbsolutePriceSumString() string {
-	if t.VolumeSold == 0 {
-		return "0"
-	}
 	return formatFloat(t.AbsolutePriceSum, -1)
 }
 
 func (t *Tick) VolumeBoughtString(decimals int8) string {
-	if t.VolumeBought == 0 {
-		return "0"
-	}
 	return formatFloat(t.VolumeBought, decimals)
 }
 
 func (t *Tick) VolumeSoldString(decimals int8) string {
-	if t.VolumeSold == 0 {
-		return "0"
-	}
 	return formatFloat(t.VolumeSold, decimals)
 }
 
@@ -78,46 +69,27 @@ func (t *Tick) TradeCountString() string {
 }
 
 func (t *Tick) MedianVolumeBoughtString(decimals int8) string {
-	if t.MedianVolumeBought == 0 {
-		return "0"
-	}
 	return formatFloat(t.MedianVolumeBought, decimals)
 }
 
 func (t *Tick) AverageVolumeBoughtString(decimals int8) string {
-	if t.AverageVolumeBought == 0 {
-		return "0"
-	}
 	return formatFloat(t.AverageVolumeBought, decimals)
 }
 
 func (t *Tick) MedianVolumeSoldString(decimals int8) string {
-	if t.MedianVolumeSold == 0 {
-		return "0"
-	}
 	return formatFloat(t.MedianVolumeSold, decimals)
 }
 
 func (t *Tick) AverageVolumeSoldString(decimals int8) string {
-	if t.AverageVolumeSold == 0 {
-		return "0"
-	}
 	return formatFloat(t.AverageVolumeSold, decimals)
 }
 
 func (t *Tick) VWAPString() string {
-	if t.VWAP == 0 {
-		return "0"
-	}
-
 	return formatFloat(t.VWAP, 5)
 }
 
 func (t *Tick) StandardDeviationString() string {
-	if t.StandardDeviation == 0 {
-		return "0"
-	}
-	return strconv.FormatFloat(t.StandardDeviation, 'f', 3, 64)
+	return formatFloat(t.StandardDeviation, 3)
 }
 
 type TickMap map[int64]Tick

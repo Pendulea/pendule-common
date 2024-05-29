@@ -378,3 +378,33 @@ func (f file) ZipDirectory(source string, target string) error {
 
 	return err
 }
+
+func (f file) CopyFile(src, dst string) error {
+	// Open the source file for reading
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("failed to open source file: %w", err)
+	}
+	defer sourceFile.Close()
+
+	// Create the destination file for writing
+	destinationFile, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer destinationFile.Close()
+
+	// Copy the contents from the source file to the destination file
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		return fmt.Errorf("failed to copy contents: %w", err)
+	}
+
+	// Ensure the contents are flushed to the destination file
+	err = destinationFile.Sync()
+	if err != nil {
+		return fmt.Errorf("failed to sync destination file: %w", err)
+	}
+
+	return nil
+}

@@ -331,9 +331,9 @@ func (candles TickTimeArray) AggregateCandlesToCandle() Tick {
 		aggregateCandle.VolumeBought += c.VolumeBought
 		aggregateCandle.VolumeSold += c.VolumeSold
 		aggregateCandle.TradeCount += c.TradeCount
-
 		tradeVolumesBought = append(tradeVolumesBought, c.VolumeBought)
 		tradeVolumesSold = append(tradeVolumesSold, c.VolumeSold)
+		aggregateCandle.AbsolutePriceSum += c.AbsolutePriceSum
 	}
 
 	aggregateCandle.MedianVolumeBought = Math.SafeMedian(tradeVolumesBought)

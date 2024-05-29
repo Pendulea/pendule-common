@@ -264,8 +264,8 @@ func (tick Tick) Stringify(decimals int8) string {
 	ret += formatFloat(tick.MedianVolumeSold, decimals) + "|"
 	ret += formatFloat(tick.AverageVolumeSold, decimals) + "|"
 	ret += formatFloat(tick.VWAP, 5) + "|"
-	ret += formatFloat(tick.StandardDeviation, 3)
-	ret += formatFloat(tick.AbsolutePriceSum, -1) + "|"
+	ret += formatFloat(tick.StandardDeviation, 3) + "|"
+	ret += formatFloat(tick.AbsolutePriceSum, -1)
 	return ret
 }
 

@@ -25,43 +25,32 @@ type Tick struct {
 	AbsolutePriceSum    float64 `json:"absolute_price_sum"`
 }
 
-func formatFloat(val float64, precision int8) string {
-	// Format the float with the specified precision
-	str := strconv.FormatFloat(val, 'f', int(precision), 64)
-
-	// Remove trailing zeros and the decimal point if it's not needed
-	str = strings.TrimRight(str, "0")
-	str = strings.TrimRight(str, ".")
-
-	return str
-}
-
 func (t *Tick) OpenString() string {
-	return formatFloat(t.Open, -1)
+	return Format.Float(t.Open, -1)
 }
 
 func (t *Tick) HighString() string {
-	return formatFloat(t.High, -1)
+	return Format.Float(t.High, -1)
 }
 
 func (t *Tick) LowString() string {
-	return formatFloat(t.Low, -1)
+	return Format.Float(t.Low, -1)
 }
 
 func (t *Tick) CloseString() string {
-	return formatFloat(t.Close, -1)
+	return Format.Float(t.Close, -1)
 }
 
 func (t *Tick) AbsolutePriceSumString() string {
-	return formatFloat(t.AbsolutePriceSum, -1)
+	return Format.Float(t.AbsolutePriceSum, -1)
 }
 
 func (t *Tick) VolumeBoughtString(decimals int8) string {
-	return formatFloat(t.VolumeBought, decimals)
+	return Format.Float(t.VolumeBought, decimals)
 }
 
 func (t *Tick) VolumeSoldString(decimals int8) string {
-	return formatFloat(t.VolumeSold, decimals)
+	return Format.Float(t.VolumeSold, decimals)
 }
 
 func (t *Tick) TradeCountString() string {
@@ -69,27 +58,27 @@ func (t *Tick) TradeCountString() string {
 }
 
 func (t *Tick) MedianVolumeBoughtString(decimals int8) string {
-	return formatFloat(t.MedianVolumeBought, decimals)
+	return Format.Float(t.MedianVolumeBought, decimals)
 }
 
 func (t *Tick) AverageVolumeBoughtString(decimals int8) string {
-	return formatFloat(t.AverageVolumeBought, decimals)
+	return Format.Float(t.AverageVolumeBought, decimals)
 }
 
 func (t *Tick) MedianVolumeSoldString(decimals int8) string {
-	return formatFloat(t.MedianVolumeSold, decimals)
+	return Format.Float(t.MedianVolumeSold, decimals)
 }
 
 func (t *Tick) AverageVolumeSoldString(decimals int8) string {
-	return formatFloat(t.AverageVolumeSold, decimals)
+	return Format.Float(t.AverageVolumeSold, decimals)
 }
 
 func (t *Tick) VWAPString() string {
-	return formatFloat(t.VWAP, 5)
+	return Format.Float(t.VWAP, 5)
 }
 
 func (t *Tick) StandardDeviationString() string {
-	return formatFloat(t.StandardDeviation, 3)
+	return Format.Float(t.StandardDeviation, 3)
 }
 
 type TickMap map[int64]Tick
@@ -226,20 +215,20 @@ func (list *TickTime) ToJSON(tick Tick) (string, error) {
 
 func (tick Tick) Stringify(decimals int8) string {
 	ret := ""
-	ret += formatFloat(tick.Open, -1) + "|"
-	ret += formatFloat(tick.High, -1) + "|"
-	ret += formatFloat(tick.Low, -1) + "|"
-	ret += formatFloat(tick.Close, -1) + "|"
-	ret += formatFloat(tick.VolumeBought, decimals) + "|"
-	ret += formatFloat(tick.VolumeSold, decimals) + "|"
+	ret += Format.Float(tick.Open, -1) + "|"
+	ret += Format.Float(tick.High, -1) + "|"
+	ret += Format.Float(tick.Low, -1) + "|"
+	ret += Format.Float(tick.Close, -1) + "|"
+	ret += Format.Float(tick.VolumeBought, decimals) + "|"
+	ret += Format.Float(tick.VolumeSold, decimals) + "|"
 	ret += strconv.FormatInt(tick.TradeCount, 10) + "|"
-	ret += formatFloat(tick.MedianVolumeBought, decimals) + "|"
-	ret += formatFloat(tick.AverageVolumeBought, decimals) + "|"
-	ret += formatFloat(tick.MedianVolumeSold, decimals) + "|"
-	ret += formatFloat(tick.AverageVolumeSold, decimals) + "|"
-	ret += formatFloat(tick.VWAP, 5) + "|"
-	ret += formatFloat(tick.StandardDeviation, 3) + "|"
-	ret += formatFloat(tick.AbsolutePriceSum, -1)
+	ret += Format.Float(tick.MedianVolumeBought, decimals) + "|"
+	ret += Format.Float(tick.AverageVolumeBought, decimals) + "|"
+	ret += Format.Float(tick.MedianVolumeSold, decimals) + "|"
+	ret += Format.Float(tick.AverageVolumeSold, decimals) + "|"
+	ret += Format.Float(tick.VWAP, 5) + "|"
+	ret += Format.Float(tick.StandardDeviation, 3) + "|"
+	ret += Format.Float(tick.AbsolutePriceSum, -1)
 	return ret
 }
 

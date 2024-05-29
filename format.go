@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -185,4 +187,19 @@ func (f format) EncodeStructIntoMap(data interface{}) (map[string]interface{}, e
 	}
 
 	return resultMap, nil
+}
+
+func (f format) Float(val float64, precision int8) string {
+	// Format the float with the specified precision
+	str := strconv.FormatFloat(val, 'f', int(precision), 64)
+
+	// Remove trailing zeros and the decimal point if it's not needed
+	str = strings.TrimRight(str, "0")
+	str = strings.TrimRight(str, ".")
+
+	if str == "" {
+		return "0"
+	}
+
+	return str
 }

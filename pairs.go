@@ -2,21 +2,28 @@ package pcommon
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 type Pair struct {
-	Binance          bool   `json:"binance"`
-	Symbol0          string `json:"symbol0"`
-	Symbol1          string `json:"symbol1"`
-	MinHistoricalDay string `json:"min_historical_day"`
-	VolumeDecimals   int8   `json:"volume_decimals"`
-	Futures          bool   `json:"futures"`     // if true, it the candle will be constructed from futures data, otherwise from spot data
-	HasFutures       bool   `json:"has_futures"` //if true it will fetch and use futures side data like book depth, ticker metrics and liquiditations
+	Binance                        bool   `json:"binance"`
+	Symbol0                        string `json:"symbol0"`
+	Symbol1                        string `json:"symbol1"`
+	MinHistoricalDay               string `json:"min_historical_day"`                 // the minimum day to fetch historical data
+	MinBookDepthHistoricalDay      string `json:"min_book_depth_historical_day"`      // the minimum day to fetch book depth historical data
+	MinBookTickerHistoricalDay     string `json:"min_book_ticker_historical_day"`     // the minimum day to fetch book ticker historical data
+	MinLiquidationHistoricalDay    string `json:"min_liquidation_historical_day"`     // the minimum day to fetch liquidation historical data
+	MinFuturesMetricsHistoricalDay string `json:"min_futures_metrics_historical_day"` // the minimum day to fetch futures metrics historical data
+
+	VolumeDecimals int8 `json:"volume_decimals"`
+	Futures        bool `json:"futures"`     // if true, it the candle will be constructed from futures data, otherwise from spot data
+	HasFutures     bool `json:"has_futures"` //if true it will fetch and use futures side data like book depth, ticker metrics and liquiditations
 }
 
 func (p *Pair) GetVolumeDecimals() int8 {
@@ -82,18 +89,18 @@ func (p *Pair) Copy() Pair {
 	}
 }
 
-func (p Pair) BuildSetID() string {
+func (p *Pair) BuildSetID() string {
 	if p.Binance {
 		return Format.BuildSetID(p.BuildBinanceSymbol(), p.TradeType())
 	}
 	return ""
 }
 
-func (p Pair) IsBinanceValid() bool {
+func (p *Pair) IsBinanceValid() bool {
 	return p.Binance && p.Symbol0 != "" && p.Symbol1 != ""
 }
 
-func (p Pair) ErrorFilter(allowedStablePairs []string) error {
+func (p *Pair) ErrorFilter(allowedStablePairs []string) error {
 
 	if p.MinHistoricalDay == "" {
 		return fmt.Errorf("min_historical_day is required")
@@ -118,16 +125,20 @@ func (p Pair) ErrorFilter(allowedStablePairs []string) error {
 	return nil
 }
 
-func (p Pair) BuildBinanceSymbol() string {
+func (p *Pair) BuildBinanceSymbol() string {
 	if p.Binance {
 		return strings.ToUpper(p.Symbol0 + p.Symbol1)
 	}
 	return ""
 }
 
-func (pair Pair) BuildBinanceBookDepthArchiveURL(date string) string {
+func (pair *Pair) BuildBinanceBookDepthArchiveURL(date string) string {
 	symbol := pair.BuildBinanceSymbol()
 	if symbol == "" {
+		return ""
+	}
+
+	if strings.Compare(pair.MinBookDepthHistoricalDay, date) > 0 {
 		return ""
 	}
 
@@ -138,9 +149,13 @@ func (pair Pair) BuildBinanceBookDepthArchiveURL(date string) string {
 	return ""
 }
 
-func (pair Pair) BuildBinanceTradesArchiveURL(date string) string {
+func (pair *Pair) BuildBinanceTradesArchiveURL(date string) string {
 	symbol := pair.BuildBinanceSymbol()
 	if symbol == "" {
+		return ""
+	}
+
+	if strings.Compare(pair.MinHistoricalDay, date) > 0 {
 		return ""
 	}
 
@@ -154,7 +169,7 @@ func (pair Pair) BuildBinanceTradesArchiveURL(date string) string {
 	}
 }
 
-func (pair Pair) CheckBinanceSymbolWorks() (bool, error) {
+func (pair *Pair) CheckBinanceSymbolWorks() (bool, error) {
 	symbol := pair.BuildBinanceSymbol()
 	if symbol == "" {
 		return false, nil
@@ -167,4 +182,38 @@ func (pair Pair) CheckBinanceSymbolWorks() (bool, error) {
 	}
 	defer resp.Body.Close() // Ensure we close the response body
 	return resp.StatusCode == 200, nil
+}
+
+func (pair *Pair) FindBookDepthMinHistoricalDay() (string, error) {
+	if pair.MinBookDepthHistoricalDay != "" {
+		return pair.MinBookDepthHistoricalDay, nil
+	}
+
+	minDay := pair.MinHistoricalDay
+
+	for {
+		url := pair.BuildBinanceBookDepthArchiveURL(minDay)
+		if url == "" {
+			return "", errors.New("not possible to access book depth data")
+		}
+		resp, err := http.Head(url) // Perform a HEAD request
+		if err != nil {
+			return "", err
+		}
+		defer resp.Body.Close() // Ensure we close the response body
+		if resp.StatusCode == 200 {
+			pair.MinBookDepthHistoricalDay = minDay
+			return minDay, nil
+		}
+		t, err := Format.StrDateToDate(minDay)
+		if err != nil {
+			return "", err
+		}
+		if t.After(time.Now()) {
+			break
+		}
+		minDay = Format.FormatDateStr(t.Add(time.Hour * 24))
+		time.Sleep(time.Millisecond * 30)
+	}
+	return "", errors.New("not possible to access book depth data")
 }

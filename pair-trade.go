@@ -69,7 +69,7 @@ func (tradeType TradeType) parseTradeFromCSVLine(fields []string) (Trade, error)
 }
 
 func (p *Pair) ParseTradesFromCSV(date string) (TradeList, error) {
-	file, err := os.Open(p.BuildArchivesFilePath(date, "csv"))
+	file, err := os.Open(p.BuildTradesArchivesFilePath(date, "csv"))
 	if err != nil {
 		return nil, err
 	}

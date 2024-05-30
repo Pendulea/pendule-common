@@ -15,7 +15,8 @@ type Pair struct {
 	Symbol1          string `json:"symbol1"`
 	MinHistoricalDay string `json:"min_historical_day"`
 	VolumeDecimals   int8   `json:"volume_decimals"`
-	Futures          bool   `json:"futures"`
+	Futures          bool   `json:"futures"`     // if true, it the candle will be constructed from futures data, otherwise from spot data
+	HasFutures       bool   `json:"has_futures"` //if true it will fetch and use futures side data like book depth, ticker metrics and liquiditations
 }
 
 func (p *Pair) GetVolumeDecimals() int8 {
@@ -32,13 +33,27 @@ func (p *Pair) TradeType() TradeType {
 	return SPOT_TRADE
 }
 
-func (p *Pair) BuildArchiveFolderPath() string {
+func (p *Pair) BuildTradesArchiveFolderPath() string {
 	path := fmt.Sprintf("%s/%s/%s", Env.ARCHIVES_DIR, p.BuildBinanceSymbol(), p.TradeType().Key())
 	return path
 }
 
-func (p *Pair) BuildArchivesFilePath(date string, ext string) string {
-	fp := p.BuildArchiveFolderPath()
+func (p *Pair) BuildBookDepthArchiveFolderPath() string {
+	path := fmt.Sprintf("%s/%s/%s", Env.ARCHIVES_DIR, p.BuildBinanceSymbol(), "book_depth")
+	return path
+}
+
+func (p *Pair) BuildBookDepthArchivesFilePath(date string, ext string) string {
+	fp := p.BuildBookDepthArchiveFolderPath()
+	symbol := p.BuildBinanceSymbol()
+	if ext != "csv" && ext != "zip" {
+		log.Fatal("invalid extension for archive file")
+	}
+	return fmt.Sprintf("%s/%s-bookDepth-%s.%s", fp, symbol, date, ext)
+}
+
+func (p *Pair) BuildTradesArchivesFilePath(date string, ext string) string {
+	fp := p.BuildTradesArchiveFolderPath()
 	symbol := p.BuildBinanceSymbol()
 	if ext != "csv" && ext != "zip" {
 		log.Fatal("invalid extension for archive file")
@@ -63,6 +78,7 @@ func (p *Pair) Copy() Pair {
 		MinHistoricalDay: p.MinHistoricalDay,
 		Futures:          p.Futures,
 		VolumeDecimals:   p.VolumeDecimals,
+		HasFutures:       p.HasFutures,
 	}
 }
 
@@ -109,13 +125,25 @@ func (p Pair) BuildBinanceSymbol() string {
 	return ""
 }
 
-func (pair Pair) BuildBinanceArchiveURL() string {
+func (pair Pair) BuildBinanceBookDepthArchiveURL(date string) string {
 	symbol := pair.BuildBinanceSymbol()
 	if symbol == "" {
 		return ""
 	}
 
-	date := pair.MinHistoricalDay
+	if pair.HasFutures {
+		fileName := fmt.Sprintf("%s-bookDepth-%s.zip", symbol, date)
+		return fmt.Sprintf("https://data.binance.vision/data/futures/um/daily/bookDepth/%s/%s", symbol, fileName)
+	}
+	return ""
+}
+
+func (pair Pair) BuildBinanceTradesArchiveURL(date string) string {
+	symbol := pair.BuildBinanceSymbol()
+	if symbol == "" {
+		return ""
+	}
+
 	futures := pair.Futures
 
 	fileName := fmt.Sprintf("%s-trades-%s.zip", symbol, date)
@@ -132,7 +160,7 @@ func (pair Pair) CheckBinanceSymbolWorks() (bool, error) {
 		return false, nil
 	}
 
-	url := pair.BuildBinanceArchiveURL()
+	url := pair.BuildBinanceTradesArchiveURL(pair.MinHistoricalDay)
 	resp, err := http.Head(url) // Perform a HEAD request
 	if err != nil {
 		return false, err

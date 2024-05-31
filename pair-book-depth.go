@@ -53,10 +53,35 @@ func (p *Pair) ParseBookDepthFromCSV(date string) (BookDepthList, error) {
 	reader.TrimLeadingSpace = true
 
 	var bookDepths BookDepthList
-	// Read the header row (and ignore it if necessary)
-	if _, err := reader.Read(); err != nil {
+
+	// Check if the CSV is empty
+	firstRow, err := reader.Read()
+	if err == io.EOF {
+		// CSV is empty, return an empty slice
+		return bookDepths, nil
+	}
+	if err != nil {
 		return nil, err
 	}
+
+	// Determine if the first row is a header or a data row
+	if isHeader(firstRow) {
+		// Read the next row if the first row is a header
+		firstRow, err = reader.Read()
+		if err == io.EOF {
+			// CSV only contains a header, return an empty slice
+			return bookDepths, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	bd, err := parseBookDepthFromCSVLine(firstRow)
+	if err != nil {
+		return nil, err
+	}
+	bookDepths = append(bookDepths, bd)
 
 	for {
 		fields, err := reader.Read()

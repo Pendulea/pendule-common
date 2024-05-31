@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"strconv"
 )
@@ -80,10 +81,34 @@ func (p *Pair) ParseTradesFromCSV(date string) (TradeList, error) {
 
 	var trades TradeList
 
-	// Read the header row (and ignore it if necessary)
-	if _, err := reader.Read(); err != nil {
+	// Check if the CSV is empty
+	firstRow, err := reader.Read()
+	if err == io.EOF {
+		// CSV is empty, return an empty slice
+		return trades, nil
+	}
+	if err != nil {
 		return nil, err
 	}
+
+	// Determine if the first row is a header or a data row
+	if isHeader(firstRow) {
+		// Read the next row if the first row is a header
+		firstRow, err = reader.Read()
+		if err == io.EOF {
+			// CSV only contains a header, return an empty slice
+			return trades, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	trade, err := p.TradeType().parseTradeFromCSVLine(firstRow)
+	if err != nil {
+		return nil, err
+	}
+	trades = append(trades, trade)
 
 	for {
 		fields, err := reader.Read()
@@ -99,7 +124,19 @@ func (p *Pair) ParseTradesFromCSV(date string) (TradeList, error) {
 			return nil, err
 		}
 		trades = append(trades, trade)
+
+		// Convert fields to a trade and append to trades
 	}
 
 	return trades, nil
+}
+
+// Example function to determine if a row is a header
+func isHeader(row []string) bool {
+	for _, field := range row {
+		if strings.Contains(field, "time") || strings.Contains(field, "date") || strings.Contains(field, "id") {
+			return true
+		}
+	}
+	return false
 }

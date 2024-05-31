@@ -14,7 +14,7 @@ type BookDepthTick struct {
 	Count  int     `json:"count"`
 }
 
-type BookDepthTickMap map[int64]BookDepthTick
+type BookDepthTickMap map[int64][]BookDepthTick
 
 type BookDepthTickTime struct {
 	BookDepthTick
@@ -35,11 +35,11 @@ func (t *BookDepthTickTime) ToTick() BookDepthTick {
 }
 
 func (tmap *BookDepthTickMap) ToTickTimeArray() *BookDepthTickTimeArray {
-	tickTimeArray := make(BookDepthTickTimeArray, len(*tmap))
-	i := 0
-	for time, tick := range *tmap {
-		tickTimeArray[i] = tick.ToTickTime(time)
-		i++
+	tickTimeArray := make(BookDepthTickTimeArray, 0)
+	for time, ticks := range *tmap {
+		for _, t := range ticks {
+			tickTimeArray = append(tickTimeArray, t.ToTickTime(time))
+		}
 	}
 	return &tickTimeArray
 }

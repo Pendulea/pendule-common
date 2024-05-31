@@ -109,8 +109,8 @@ func (f file) UnzipFile(zipPath, outputPath string) error {
 			}
 		}
 	}
-	time.Sleep(1 * time.Second)
 
+	time.Sleep(50 * time.Millisecond)
 	return nil
 }
 

@@ -2,19 +2,18 @@ package pcommon
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 type Pair struct {
-	Binance                        bool   `json:"binance"`
-	Symbol0                        string `json:"symbol0"`
-	Symbol1                        string `json:"symbol1"`
+	Binance bool   `json:"binance"`
+	Symbol0 string `json:"symbol0"`
+	Symbol1 string `json:"symbol1"`
+
 	MinHistoricalDay               string `json:"min_historical_day"`                 // the minimum day to fetch historical data
 	MinBookDepthHistoricalDay      string `json:"min_book_depth_historical_day"`      // the minimum day to fetch book depth historical data
 	MinBookTickerHistoricalDay     string `json:"min_book_ticker_historical_day"`     // the minimum day to fetch book ticker historical data
@@ -79,13 +78,17 @@ func (p *Pair) JSON() ([]byte, error) {
 
 func (p *Pair) Copy() Pair {
 	return Pair{
-		Binance:          p.Binance,
-		Symbol0:          p.Symbol0,
-		Symbol1:          p.Symbol1,
-		MinHistoricalDay: p.MinHistoricalDay,
-		Futures:          p.Futures,
-		VolumeDecimals:   p.VolumeDecimals,
-		HasFutures:       p.HasFutures,
+		Binance:                        p.Binance,
+		Symbol0:                        p.Symbol0,
+		Symbol1:                        p.Symbol1,
+		MinHistoricalDay:               p.MinHistoricalDay,
+		Futures:                        p.Futures,
+		VolumeDecimals:                 p.VolumeDecimals,
+		HasFutures:                     p.HasFutures,
+		MinBookDepthHistoricalDay:      p.MinBookDepthHistoricalDay,
+		MinBookTickerHistoricalDay:     p.MinBookTickerHistoricalDay,
+		MinLiquidationHistoricalDay:    p.MinLiquidationHistoricalDay,
+		MinFuturesMetricsHistoricalDay: p.MinFuturesMetricsHistoricalDay,
 	}
 }
 
@@ -182,38 +185,4 @@ func (pair *Pair) CheckBinanceSymbolWorks() (bool, error) {
 	}
 	defer resp.Body.Close() // Ensure we close the response body
 	return resp.StatusCode == 200, nil
-}
-
-func (pair *Pair) FindBookDepthMinHistoricalDay() (string, error) {
-	if pair.MinBookDepthHistoricalDay != "" {
-		return pair.MinBookDepthHistoricalDay, nil
-	}
-
-	minDay := pair.MinHistoricalDay
-
-	for {
-		url := pair.BuildBinanceBookDepthArchiveURL(minDay)
-		if url == "" {
-			return "", errors.New("not possible to access book depth data")
-		}
-		resp, err := http.Head(url) // Perform a HEAD request
-		if err != nil {
-			return "", err
-		}
-		defer resp.Body.Close() // Ensure we close the response body
-		if resp.StatusCode == 200 {
-			pair.MinBookDepthHistoricalDay = minDay
-			return minDay, nil
-		}
-		t, err := Format.StrDateToDate(minDay)
-		if err != nil {
-			return "", err
-		}
-		if t.After(time.Now()) {
-			break
-		}
-		minDay = Format.FormatDateStr(t.Add(time.Hour * 24))
-		time.Sleep(time.Millisecond * 30)
-	}
-	return "", errors.New("not possible to access book depth data")
 }

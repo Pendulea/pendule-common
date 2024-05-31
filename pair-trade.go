@@ -2,7 +2,6 @@ package pcommon
 
 import (
 	"encoding/csv"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -97,8 +96,7 @@ func (p *Pair) ParseTradesFromCSV(date string) (TradeList, error) {
 
 		trade, err := p.TradeType().parseTradeFromCSVLine(fields)
 		if err != nil {
-			fmt.Printf("Error parsing line: %v\n", err)
-			continue // or return nil, err to stop processing on error
+			return nil, err
 		}
 		trades = append(trades, trade)
 	}

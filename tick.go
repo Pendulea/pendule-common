@@ -83,62 +83,21 @@ func (t *Tick) StandardDeviationString() string {
 type TickMap map[int64]Tick
 
 type TickTime struct {
-	Open                float64 `json:"open"`
-	High                float64 `json:"high"`
-	Low                 float64 `json:"low"`
-	Close               float64 `json:"close"`
-	VolumeBought        float64 `json:"volume_bought"`
-	VolumeSold          float64 `json:"volume_sold"`
-	TradeCount          int64   `json:"trade_count"`
-	MedianVolumeBought  float64 `json:"median_volume_bought"`
-	AverageVolumeBought float64 `json:"average_volume_bought"`
-	MedianVolumeSold    float64 `json:"median_volume_sold"`
-	AverageVolumeSold   float64 `json:"average_volume_sold"`
-	VWAP                float64 `json:"vwap"`
-	StandardDeviation   float64 `json:"standard_deviation"`
-	AbsolutePriceSum    float64 `json:"absolute_price_sum"`
-	Time                int64   `json:"time"`
+	Tick
+	Time int64 `json:"time"`
 }
 
 type TickTimeArray []TickTime
 
 func (t *Tick) ToTickTime(time int64) TickTime {
 	return TickTime{
-		Open:                t.Open,
-		High:                t.High,
-		Low:                 t.Low,
-		Close:               t.Close,
-		VolumeBought:        t.VolumeBought,
-		VolumeSold:          t.VolumeSold,
-		TradeCount:          t.TradeCount,
-		MedianVolumeBought:  t.MedianVolumeBought,
-		AverageVolumeBought: t.AverageVolumeBought,
-		MedianVolumeSold:    t.MedianVolumeSold,
-		AverageVolumeSold:   t.AverageVolumeSold,
-		VWAP:                t.VWAP,
-		StandardDeviation:   t.StandardDeviation,
-		AbsolutePriceSum:    t.AbsolutePriceSum,
-		Time:                time,
+		Tick: *t,
+		Time: time,
 	}
 }
 
 func (t *TickTime) ToTick() Tick {
-	return Tick{
-		Open:                t.Open,
-		High:                t.High,
-		Low:                 t.Low,
-		Close:               t.Close,
-		VolumeBought:        t.VolumeBought,
-		VolumeSold:          t.VolumeSold,
-		TradeCount:          t.TradeCount,
-		MedianVolumeBought:  t.MedianVolumeBought,
-		AverageVolumeBought: t.AverageVolumeBought,
-		MedianVolumeSold:    t.MedianVolumeSold,
-		AverageVolumeSold:   t.AverageVolumeSold,
-		VWAP:                t.VWAP,
-		StandardDeviation:   t.StandardDeviation,
-		AbsolutePriceSum:    t.AbsolutePriceSum,
-	}
+	return t.Tick
 }
 
 func (tmap *TickMap) ToTickTimeArray() *TickTimeArray {

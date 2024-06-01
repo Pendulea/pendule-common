@@ -168,7 +168,7 @@ func (fbdtt *FullBookDepthTickTime) Time() time.Time {
 	return time.Unix(0, 0)
 }
 
-func (fbd FullBookDepthTick) stringify(decimals int8) string {
+func (fbd FullBookDepthTick) Stringify(decimals int8) string {
 	ret := make([]string, 10)
 	keys := fbd.Keys()
 	for i, k := range keys {
@@ -178,7 +178,7 @@ func (fbd FullBookDepthTick) stringify(decimals int8) string {
 	return strings.Join(ret, "@")
 }
 
-func parseFullBookDepthTick(str string) FullBookDepthTick {
+func ParseFullBookDepthTick(str string) FullBookDepthTick {
 	ret := make(FullBookDepthTick, 10)
 	split := strings.Split(str, "@")
 	for i, s := range split {

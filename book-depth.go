@@ -1,6 +1,7 @@
 package pcommon
 
 import (
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -9,6 +10,8 @@ import (
 // the key is the percentage of the book depth
 type FullBookDepthTick map[int]SingleBookDepth
 type FullBookDepthTickTime map[int]SingleBookDepthTime
+
+type FullBookDepthTickArray []FullBookDepthTick
 
 type SingleBookDepth struct {
 	Percent int `json:"percent"`
@@ -27,6 +30,11 @@ type SingleBookDepthTime struct {
 	Time int64 `json:"time"`
 }
 
+type SingleBookDepthList []SingleBookDepth
+
+// the key is the timestamp
+type FullBookDepthTickMap map[int64]FullBookDepthTick
+
 func newEmptyFullBookDepthTickTime(time int64) *FullBookDepthTickTime {
 	ret := make(FullBookDepthTickTime, 10)
 	for i := -5; i <= 5; i++ {
@@ -42,9 +50,6 @@ func newEmptyFullBookDepthTickTime(time int64) *FullBookDepthTickTime {
 	}
 	return &ret
 }
-
-// the key is the timestamp
-type FullBookDepthTickMap map[int64]FullBookDepthTick
 
 func (fdbtp *FullBookDepthTickMap) Keys(sortAsc bool) []int64 {
 	keys := make([]int64, len(*fdbtp))
@@ -65,6 +70,34 @@ func (fdbtp *FullBookDepthTick) Keys() []int {
 		i++
 	}
 	return Sort[int](keys, false)
+}
+
+func AggregateSingleBookDepthTicks(ticks SingleBookDepthList) *SingleBookDepth {
+	if len(ticks) == 0 {
+		return nil
+	}
+
+	ret := SingleBookDepth{
+		Percent: ticks[0].Percent,
+		Count:   1,
+		Open:    ticks[0].Open,
+		High:    ticks[0].High,
+		Low:     ticks[0].Low,
+		Close:   ticks[0].Close,
+	}
+
+	values := []float64{ticks[0].Avg}
+	for i := 1; i < len(ticks); i++ {
+		ret.High = math.Max(ret.High, ticks[i].High)
+		ret.Low = math.Min(ret.Low, ticks[i].Low)
+		ret.Close = ticks[i].Close
+		ret.Count++
+		values = append(values, ticks[i].Avg)
+	}
+
+	ret.Avg = Math.SafeAverage(values)
+	ret.Median = Math.SafeMedian(values)
+	return &ret
 }
 
 func (t *SingleBookDepth) ToTime(time int64) SingleBookDepthTime {
@@ -89,6 +122,25 @@ func (fbdtm *FullBookDepthTickMap) ToTime() []FullBookDepthTickTime {
 	for time, fbdt := range *fbdtm {
 		ret[i] = fbdt.ToTime(time)
 		i++
+	}
+	return ret
+}
+
+func (fbdtm *FullBookDepthTickMap) ToSortedAscArray() FullBookDepthTickArray {
+	ret := make(FullBookDepthTickArray, len(*fbdtm))
+	keys := fbdtm.Keys(true)
+	for i, k := range keys {
+		ret[i] = (*fbdtm)[k]
+	}
+	return ret
+}
+
+func (fbd *FullBookDepthTickArray) PickSingles(percentage int) SingleBookDepthList {
+	ret := make(SingleBookDepthList, len(*fbd))
+	for i, fbdt := range *fbd {
+		if sbdt, ok := fbdt[percentage]; ok {
+			ret[i] = sbdt
+		}
 	}
 	return ret
 }

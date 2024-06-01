@@ -283,6 +283,7 @@ func (f file) GetSortedFilenamesByDate(directoryPath string) ([]FileInfo, error)
 	return fileInfos, nil
 }
 
+// addFileToZip adds a file or directory to the zip archive.
 func addFileToZip(zipWriter *zip.Writer, filePath string, basePath string) error {
 	// Open the file to be added
 	file, err := os.Open(filePath)
@@ -308,6 +309,9 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, basePath string) error
 	if err != nil {
 		return err
 	}
+
+	// Ensure the header name uses forward slashes for compatibility
+	header.Name = strings.ReplaceAll(header.Name, string(os.PathSeparator), "/")
 
 	// If the file is a directory, ensure the zip entry reflects that
 	if fileInfo.IsDir() {
@@ -336,7 +340,8 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, basePath string) error
 	return nil
 }
 
-func (f file) ZipDirectory(source string, target string) error {
+// ZipDirectory zips the contents of the source directory to the target zip file.
+func ZipDirectory(source string, target string) error {
 	// Create a file to write the zip archive to
 	zipFile, err := os.Create(target)
 	if err != nil {

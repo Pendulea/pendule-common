@@ -129,11 +129,6 @@ type FileCallback func(fileName string)
 func (f file) InitFolderWatcher(folderPath string, callback FileCallback, watcher *fsnotify.Watcher) error {
 	// First, list all existing zip files in the folder.
 
-	files, err := f.SortFolderFilesDesc(folderPath)
-	if err != nil {
-		return err
-	}
-
 	callbackDownloadedFile := func(filePath string) bool {
 		retry := 10
 		if hasFileBeenModified(filePath, time.Minute) {
@@ -147,21 +142,6 @@ func (f file) InitFolderWatcher(folderPath string, callback FileCallback, watche
 			time.Sleep(1 * time.Minute)
 		}
 		return false
-	}
-
-	for _, file := range files {
-		if filepath.Ext(file) == ".zip" {
-			fullPath := filepath.Join(folderPath, file)
-			if hasFileBeenModified(fullPath, time.Minute) {
-				callback(fullPath)
-			} else {
-				go func(fullPath string) {
-					if callbackDownloadedFile(fullPath) {
-						callback(fullPath)
-					}
-				}(fullPath)
-			}
-		}
 	}
 
 	// Start a goroutine to handle the events.
@@ -191,7 +171,7 @@ func (f file) InitFolderWatcher(folderPath string, callback FileCallback, watche
 	}()
 
 	// Add the directory to the watcher.
-	err = watcher.Add(folderPath)
+	err := watcher.Add(folderPath)
 	if err != nil {
 		return err
 	}

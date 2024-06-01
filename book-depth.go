@@ -1,8 +1,16 @@
 package pcommon
 
-import "strconv"
+import (
+	"strconv"
+	"strings"
+	"time"
+)
 
-type BookDepthTick struct {
+// the key is the percentage of the book depth
+type FullBookDepthTick map[int]SingleBookDepth
+type FullBookDepthTickTime map[int]SingleBookDepthTime
+
+type SingleBookDepth struct {
 	Percent int `json:"percent"`
 
 	Open   float64 `json:"open"`
@@ -14,68 +22,120 @@ type BookDepthTick struct {
 	Count  int     `json:"count"`
 }
 
-type BookDepthTickMap map[int64][]BookDepthTick
-
-type BookDepthTickTime struct {
-	BookDepthTick
+type SingleBookDepthTime struct {
+	SingleBookDepth
 	Time int64 `json:"time"`
 }
 
-type BookDepthTickTimeArray []BookDepthTickTime
-
-func (t *BookDepthTick) ToTickTime(time int64) BookDepthTickTime {
-	return BookDepthTickTime{
-		BookDepthTick: *t,
-		Time:          time,
-	}
-}
-
-func (t *BookDepthTickTime) IsFetched() bool {
-	return t.Percent != 0
-}
-
-func (t *BookDepthTickTime) ToTick() BookDepthTick {
-	return t.BookDepthTick
-}
-
-func (tmap *BookDepthTickMap) ToTickTimeArray() *BookDepthTickTimeArray {
-	tickTimeArray := make(BookDepthTickTimeArray, 0)
-	for time, ticks := range *tmap {
-		for _, t := range ticks {
-			tickTimeArray = append(tickTimeArray, t.ToTickTime(time))
-		}
-	}
-	return &tickTimeArray
-}
-
-func (tta *BookDepthTickTimeArray) Sort(asc bool) BookDepthTickTimeArray {
-	if asc {
-		ret := make(BookDepthTickTimeArray, len(*tta))
-		copy(ret, *tta)
-		for i := 0; i < len(ret); i++ {
-			for j := i + 1; j < len(ret); j++ {
-				if ret[i].Time > ret[j].Time {
-					ret[i], ret[j] = ret[j], ret[i]
-				}
+func newEmptyFullBookDepthTickTime(time int64) *FullBookDepthTickTime {
+	ret := make(FullBookDepthTickTime, 10)
+	for i := -5; i <= 5; i++ {
+		if i != 0 {
+			ret[i] = SingleBookDepthTime{
+				Time: time,
+				SingleBookDepth: SingleBookDepth{
+					Percent: i,
+					Count:   0,
+				},
 			}
 		}
-		*tta = ret
-	} else {
-		ret := make(BookDepthTickTimeArray, len(*tta))
-		copy(ret, *tta)
-		for i := 0; i < len(ret); i++ {
-			for j := i + 1; j < len(ret); j++ {
-				if ret[i].Time < ret[j].Time {
-					ret[i], ret[j] = ret[j], ret[i]
-				}
-			}
-		}
-		*tta = ret
 	}
-	return *tta
+	return &ret
 }
 
-func (tick BookDepthTick) Stringify(decimals int8) string {
+// the key is the timestamp
+type FullBookDepthTickMap map[int64]FullBookDepthTick
+
+func (fdbtp *FullBookDepthTickMap) Keys(sortAsc bool) []int64 {
+	keys := make([]int64, len(*fdbtp))
+	i := 0
+	for k := range *fdbtp {
+		keys[i] = k
+		i++
+	}
+	return Sort[int64](keys, !sortAsc)
+}
+
+// returns the percentaages of the book depth sorted in ascending order
+func (fdbtp *FullBookDepthTick) Keys() []int {
+	keys := make([]int, len(*fdbtp))
+	i := 0
+	for k := range *fdbtp {
+		keys[i] = k
+		i++
+	}
+	return Sort[int](keys, false)
+}
+
+func (t *SingleBookDepth) ToTime(time int64) SingleBookDepthTime {
+	return SingleBookDepthTime{
+		SingleBookDepth: *t,
+		Time:            time,
+	}
+}
+
+func (t *FullBookDepthTick) ToTime(time int64) FullBookDepthTickTime {
+	ret := make(FullBookDepthTickTime, len(*t))
+	for t, sbd := range *t {
+		ret[t] = sbd.ToTime(time)
+	}
+	return ret
+}
+
+func (fbdtm *FullBookDepthTickMap) ToTime() []FullBookDepthTickTime {
+	ret := make([]FullBookDepthTickTime, len(*fbdtm))
+
+	i := 0
+	for time, fbdt := range *fbdtm {
+		ret[i] = fbdt.ToTime(time)
+		i++
+	}
+	return ret
+}
+
+func (fbdtt *FullBookDepthTickTime) IsFilled() bool {
+	if len(*fbdtt) != 10 {
+		return false
+	}
+
+	for _, sbdt := range *fbdtt {
+		if sbdt.Count == 0 {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (fbdtt *FullBookDepthTickTime) Time() time.Time {
+	for _, sbdt := range *fbdtt {
+		if sbdt.Time > 0 {
+			return time.Unix(sbdt.Time, 0)
+		}
+	}
+	return time.Unix(0, 0)
+}
+
+func (fbd FullBookDepthTick) stringify(decimals int8) string {
+	ret := make([]string, 10)
+	keys := fbd.Keys()
+	for i, k := range keys {
+		ret[i] = fbd[k].stringify(decimals)
+	}
+
+	return strings.Join(ret, "@")
+}
+
+func parseFullBookDepthTick(str string) FullBookDepthTick {
+	ret := make(FullBookDepthTick, 10)
+	split := strings.Split(str, "@")
+	for i, s := range split {
+		ret[i] = parseSingleBookDepthTick(s)
+	}
+	return ret
+}
+
+func (tick SingleBookDepth) stringify(decimals int8) string {
 	ret := ""
 	if tick.Count == 1 {
 		ret += strconv.Itoa(tick.Percent) + "|"
@@ -93,13 +153,13 @@ func (tick BookDepthTick) Stringify(decimals int8) string {
 	return ret
 }
 
-func ParseBookDepthTick(str string) BookDepthTick {
+func parseSingleBookDepthTick(str string) SingleBookDepth {
 	split := ChunkString(str, 2)
 	percent, _ := strconv.Atoi(split[0])
 	open, _ := strconv.ParseFloat(split[1], 64)
 
 	if len(split) == 2 {
-		return BookDepthTick{
+		return SingleBookDepth{
 			Percent: percent,
 			Open:    open,
 			High:    open,
@@ -118,7 +178,7 @@ func ParseBookDepthTick(str string) BookDepthTick {
 	median, _ := strconv.ParseFloat(split[6], 64)
 	count, _ := strconv.Atoi(split[7])
 
-	return BookDepthTick{
+	return SingleBookDepth{
 		Percent: percent,
 		Open:    open,
 		High:    high,

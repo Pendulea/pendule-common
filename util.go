@@ -49,3 +49,26 @@ func Unique[T time.Duration | string](slice []T) []T {
 	}
 	return list
 }
+
+func Sort[T int64 | int](slice []T, desc bool) []T {
+	ret := make([]T, len(slice))
+	copy(ret, slice)
+	if desc {
+		for i := 0; i < len(ret); i++ {
+			for j := i + 1; j < len(ret); j++ {
+				if ret[i] < ret[j] {
+					ret[i], ret[j] = ret[j], ret[i]
+				}
+			}
+		}
+	} else {
+		for i := 0; i < len(ret); i++ {
+			for j := i + 1; j < len(ret); j++ {
+				if ret[i] > ret[j] {
+					ret[i], ret[j] = ret[j], ret[i]
+				}
+			}
+		}
+	}
+	return ret
+}

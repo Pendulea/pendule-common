@@ -8,21 +8,21 @@ import (
 )
 
 type Tick struct {
-	Open                float64            `json:"open"`
-	High                float64            `json:"high"`
-	Low                 float64            `json:"low"`
-	Close               float64            `json:"close"`
-	VolumeBought        float64            `json:"volume_bought"`
-	VolumeSold          float64            `json:"volume_sold"`
-	TradeCount          int64              `json:"trade_count"`
-	MedianVolumeBought  float64            `json:"median_volume_bought"`
-	AverageVolumeBought float64            `json:"average_volume_bought"`
-	MedianVolumeSold    float64            `json:"median_volume_sold"`
-	AverageVolumeSold   float64            `json:"average_volume_sold"`
-	VWAP                float64            `json:"vwap"`
-	StandardDeviation   float64            `json:"standard_deviation"`
-	AbsolutePriceSum    float64            `json:"absolute_price_sum"`
-	PrevBookDepth       *BookDepthTickTime `json:"prev_book_depth"`
+	Open                float64                `json:"open"`
+	High                float64                `json:"high"`
+	Low                 float64                `json:"low"`
+	Close               float64                `json:"close"`
+	VolumeBought        float64                `json:"volume_bought"`
+	VolumeSold          float64                `json:"volume_sold"`
+	TradeCount          int64                  `json:"trade_count"`
+	MedianVolumeBought  float64                `json:"median_volume_bought"`
+	AverageVolumeBought float64                `json:"average_volume_bought"`
+	MedianVolumeSold    float64                `json:"median_volume_sold"`
+	AverageVolumeSold   float64                `json:"average_volume_sold"`
+	VWAP                float64                `json:"vwap"`
+	StandardDeviation   float64                `json:"standard_deviation"`
+	AbsolutePriceSum    float64                `json:"absolute_price_sum"`
+	PrevBookDepth       *FullBookDepthTickTime `json:"prev_book_depth"`
 }
 
 func (t *Tick) OpenString() string {
@@ -189,7 +189,7 @@ func (tick Tick) Stringify(decimals int8) string {
 	ret += Format.Float(tick.StandardDeviation, 3) + "|"
 	ret += Format.Float(tick.AbsolutePriceSum, -1)
 	if tick.PrevBookDepth != nil {
-		ret += "|" + strconv.FormatInt(tick.PrevBookDepth.Time, 10)
+		ret += "|" + strconv.FormatInt(tick.PrevBookDepth.Time().Unix(), 10)
 	}
 
 	return ret
@@ -212,10 +212,10 @@ func ParseTick(str string) Tick {
 	standardDeviation, _ := strconv.ParseFloat(split[12], 64)
 	absolutePriceSum, _ := strconv.ParseFloat(split[13], 64)
 
-	var pbd *BookDepthTickTime = nil
+	var pbd *FullBookDepthTickTime = nil
 	if len(split) == 15 {
 		prevBookDepthTime, _ := strconv.ParseInt(split[14], 10, 64)
-		pbd = &BookDepthTickTime{Time: prevBookDepthTime}
+		pbd = newEmptyFullBookDepthTickTime(prevBookDepthTime)
 	}
 
 	return Tick{

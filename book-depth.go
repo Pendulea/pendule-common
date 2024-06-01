@@ -30,6 +30,10 @@ func (t *BookDepthTick) ToTickTime(time int64) BookDepthTickTime {
 	}
 }
 
+func (t *BookDepthTickTime) IsFetched() bool {
+	return t.Percent != 0
+}
+
 func (t *BookDepthTickTime) ToTick() BookDepthTick {
 	return t.BookDepthTick
 }

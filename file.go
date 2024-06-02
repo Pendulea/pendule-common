@@ -56,64 +56,6 @@ func (f file) GetFileSize(filePath string) (int64, error) {
 	return fileInfo.Size(), nil
 }
 
-// UnzipFile extracts a zip archive specified by zipPath into the directory outputPath.
-func (f file) UnzipFile(zipPath, outputPath string) error {
-	r, err := zip.OpenReader(zipPath)
-	if err != nil {
-		return err // If opening the zip file fails, return the error
-	}
-	defer r.Close()
-
-	// Create output directory if it doesn't exist
-	if err := os.MkdirAll(outputPath, 0755); err != nil {
-		return err
-	}
-
-	for _, f := range r.File {
-		fpath := filepath.Join(outputPath, f.Name)
-
-		// Check for ZipSlip (Directory traversal)
-		if !strings.HasPrefix(fpath, filepath.Clean(outputPath)+string(os.PathSeparator)) {
-			return fmt.Errorf("%s: illegal file path", fpath)
-		}
-
-		if f.FileInfo().IsDir() {
-			// Make directory if it is not present
-			if err := os.MkdirAll(fpath, os.ModePerm); err != nil {
-				return err
-			}
-		} else {
-			// Make file's directory if it is not present (important if zip contains nested directories)
-			if err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
-				return err
-			}
-
-			outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-			if err != nil {
-				return err
-			}
-
-			rc, err := f.Open()
-			if err != nil {
-				outFile.Close() // Close file handle on error opening zip content
-				return err
-			}
-
-			_, err = io.Copy(outFile, rc) // Copy contents to the file
-			// Close file handles regardless of io.Copy results
-			outFile.Close()
-			rc.Close()
-
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	time.Sleep(50 * time.Millisecond)
-	return nil
-}
-
 // remove filepath
 func (f file) RemoveFile(filePath string) error {
 	err := os.Remove(filePath)
@@ -283,7 +225,89 @@ func (f file) GetSortedFilenamesByDate(directoryPath string) ([]FileInfo, error)
 	return fileInfos, nil
 }
 
-// addFileToZip adds a file or directory to the zip archive.
+func (f file) CopyFile(src, dst string) error {
+	// Open the source file for reading
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return fmt.Errorf("failed to open source file: %w", err)
+	}
+	defer sourceFile.Close()
+
+	// Create the destination file for writing
+	destinationFile, err := os.Create(dst)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer destinationFile.Close()
+
+	// Copy the contents from the source file to the destination file
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		return fmt.Errorf("failed to copy contents: %w", err)
+	}
+
+	// Ensure the contents are flushed to the destination file
+	err = destinationFile.Sync()
+	if err != nil {
+		return fmt.Errorf("failed to sync destination file: %w", err)
+	}
+
+	return nil
+}
+
+func (f file) UnzipFile(zipPath, outputPath string) error {
+	r, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	if err := os.MkdirAll(outputPath, 0755); err != nil {
+		return err
+	}
+
+	for _, f := range r.File {
+		fpath := filepath.Join(outputPath, f.Name)
+
+		// Clean and check the file path to prevent ZipSlip
+		if !strings.HasPrefix(filepath.Clean(fpath), filepath.Clean(outputPath)+string(os.PathSeparator)) {
+			return fmt.Errorf("%s: illegal file path", fpath)
+		}
+
+		if f.FileInfo().IsDir() {
+			if err := os.MkdirAll(fpath, os.ModePerm); err != nil {
+				return err
+			}
+		} else {
+			if err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+				return err
+			}
+
+			outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+			if err != nil {
+				return err
+			}
+
+			rc, err := f.Open()
+			if err != nil {
+				outFile.Close()
+				return err
+			}
+
+			_, err = io.Copy(outFile, rc)
+			outFile.Close()
+			rc.Close()
+
+			if err != nil {
+				return err
+			}
+		}
+	}
+	time.Sleep(50 * time.Millisecond)
+
+	return nil
+}
+
 func addFileToZip(zipWriter *zip.Writer, filePath string, basePath string) error {
 	// Open the file to be added
 	file, err := os.Open(filePath)
@@ -310,8 +334,8 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, basePath string) error
 		return err
 	}
 
-	// Ensure the header name uses forward slashes for compatibility
-	header.Name = strings.ReplaceAll(header.Name, string(os.PathSeparator), "/")
+	// Ensure the header name is normalized
+	header.Name = filepath.ToSlash(header.Name)
 
 	// If the file is a directory, ensure the zip entry reflects that
 	if fileInfo.IsDir() {
@@ -340,8 +364,7 @@ func addFileToZip(zipWriter *zip.Writer, filePath string, basePath string) error
 	return nil
 }
 
-// ZipDirectory zips the contents of the source directory to the target zip file.
-func ZipDirectory(source string, target string) error {
+func (f file) ZipDirectory(source string, target string) error {
 	// Create a file to write the zip archive to
 	zipFile, err := os.Create(target)
 	if err != nil {
@@ -364,31 +387,51 @@ func ZipDirectory(source string, target string) error {
 	return err
 }
 
-func (f file) CopyFile(src, dst string) error {
-	// Open the source file for reading
-	sourceFile, err := os.Open(src)
+// ZipFile zips a single file specified by sourcePath into a zip archive at targetPath
+func (f file) ZipFile(sourcePath string, targetPath string) error {
+	// Create the zip file
+	zipFile, err := os.Create(targetPath)
 	if err != nil {
-		return fmt.Errorf("failed to open source file: %w", err)
+		return fmt.Errorf("failed to create zip file: %v", err)
+	}
+	defer zipFile.Close()
+
+	// Create a new zip archive writer
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	// Open the source file
+	sourceFile, err := os.Open(sourcePath)
+	if err != nil {
+		return fmt.Errorf("failed to open source file: %v", err)
 	}
 	defer sourceFile.Close()
 
-	// Create the destination file for writing
-	destinationFile, err := os.Create(dst)
+	// Get the file information
+	fileInfo, err := sourceFile.Stat()
 	if err != nil {
-		return fmt.Errorf("failed to create destination file: %w", err)
-	}
-	defer destinationFile.Close()
-
-	// Copy the contents from the source file to the destination file
-	_, err = io.Copy(destinationFile, sourceFile)
-	if err != nil {
-		return fmt.Errorf("failed to copy contents: %w", err)
+		return fmt.Errorf("failed to get file info: %v", err)
 	}
 
-	// Ensure the contents are flushed to the destination file
-	err = destinationFile.Sync()
+	// Create a zip header from the file information
+	header, err := zip.FileInfoHeader(fileInfo)
 	if err != nil {
-		return fmt.Errorf("failed to sync destination file: %w", err)
+		return fmt.Errorf("failed to create zip header: %v", err)
+	}
+
+	// Set the header name to be the base name of the source file
+	header.Name = filepath.Base(sourcePath)
+	header.Method = zip.Deflate
+
+	// Create the zip file entry
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return fmt.Errorf("failed to create zip entry: %v", err)
+	}
+
+	// Copy the file data to the zip entry
+	if _, err := io.Copy(writer, sourceFile); err != nil {
+		return fmt.Errorf("failed to write file to zip: %v", err)
 	}
 
 	return nil

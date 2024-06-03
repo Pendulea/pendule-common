@@ -107,12 +107,24 @@ func (t *SingleBookDepth) ToTime(time int64) SingleBookDepthTime {
 	}
 }
 
-func (t *FullBookDepthTick) ToTime(time int64) FullBookDepthTickTime {
+func (t *SingleBookDepthTime) ToDefault() SingleBookDepth {
+	return t.SingleBookDepth
+}
+
+func (t *FullBookDepthTickTime) ToDefault() *FullBookDepthTick {
+	ret := make(FullBookDepthTick, len(*t))
+	for p, sbdt := range *t {
+		ret[p] = sbdt.SingleBookDepth
+	}
+	return &ret
+}
+
+func (t *FullBookDepthTick) ToTime(time int64) *FullBookDepthTickTime {
 	ret := make(FullBookDepthTickTime, len(*t))
 	for t, sbd := range *t {
 		ret[t] = sbd.ToTime(time)
 	}
-	return ret
+	return &ret
 }
 
 func (fbdtm *FullBookDepthTickMap) ToTime() []FullBookDepthTickTime {
@@ -120,7 +132,7 @@ func (fbdtm *FullBookDepthTickMap) ToTime() []FullBookDepthTickTime {
 
 	i := 0
 	for time, fbdt := range *fbdtm {
-		ret[i] = fbdt.ToTime(time)
+		ret[i] = *fbdt.ToTime(time)
 		i++
 	}
 	return ret

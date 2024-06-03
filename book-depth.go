@@ -203,7 +203,7 @@ func (tick SingleBookDepth) stringify(decimals int8) string {
 	ret := ""
 	if tick.Count == 1 {
 		ret += strconv.Itoa(tick.Percent) + "|"
-		ret += Format.Float(tick.Open, decimals) + "|"
+		ret += Format.Float(tick.Open, decimals)
 	} else if tick.Count > 1 {
 		ret += strconv.Itoa(tick.Percent) + "|"
 		ret += Format.Float(tick.Open, decimals) + "|"
@@ -212,13 +212,14 @@ func (tick SingleBookDepth) stringify(decimals int8) string {
 		ret += Format.Float(tick.Close, decimals) + "|"
 		ret += Format.Float(tick.Avg, decimals) + "|"
 		ret += Format.Float(tick.Median, decimals) + "|"
-		ret += strconv.Itoa(tick.Count) + "|"
+		ret += strconv.Itoa(tick.Count)
 	}
 	return ret
 }
 
 func parseSingleBookDepthTick(str string) SingleBookDepth {
-	split := ChunkString(str, 2)
+	split := strings.Split(str, "|")
+
 	percent, _ := strconv.Atoi(split[0])
 	open, _ := strconv.ParseFloat(split[1], 64)
 

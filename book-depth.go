@@ -193,8 +193,14 @@ func (fbd FullBookDepthTick) Stringify(decimals int8) string {
 func ParseFullBookDepthTick(str string) FullBookDepthTick {
 	ret := make(FullBookDepthTick, 10)
 	split := strings.Split(str, "@")
-	for i, s := range split {
-		ret[i] = parseSingleBookDepthTick(s)
+
+	i := 0
+	for percent := -5; percent <= 5; percent++ {
+		if percent == 0 {
+			continue
+		}
+		ret[percent] = parseSingleBookDepthTick(split[i])
+		i++
 	}
 	return ret
 }

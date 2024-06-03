@@ -260,3 +260,31 @@ func parseSingleBookDepthTick(str string) SingleBookDepth {
 		Count:   count,
 	}
 }
+
+func (t *SingleBookDepth) OpenString(decimals int8) string {
+	return Format.Float(t.Open, decimals)
+}
+
+func (t *SingleBookDepth) HighString(decimals int8) string {
+	return Format.Float(t.High, decimals)
+}
+
+func (t *SingleBookDepth) LowString(decimals int8) string {
+	return Format.Float(t.Low, decimals)
+}
+
+func (t *SingleBookDepth) CloseString(decimals int8) string {
+	return Format.Float(t.Close, decimals)
+}
+
+func (t *SingleBookDepth) AvgString(decimals int8) string {
+	return Format.Float(t.Avg, decimals)
+}
+
+func (t *SingleBookDepth) MedianString(decimals int8) string {
+	return Format.Float(t.Median, decimals)
+}
+
+func (t *SingleBookDepth) CountString() string {
+	return strconv.Itoa(t.Count)
+}

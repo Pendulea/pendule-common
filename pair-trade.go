@@ -32,7 +32,7 @@ type Trade struct {
 	Price        float64
 	Quantity     float64
 	Total        float64
-	Timestamp    int64
+	Timestamp    TimeUnit
 	IsBuyerMaker bool
 	IsBestMatch  bool
 }
@@ -59,10 +59,11 @@ func (tradeType TradeType) parseTradeFromCSVLine(fields []string) (Trade, error)
 	if err != nil {
 		return Trade{}, err
 	}
-	trade.Timestamp, err = strconv.ParseInt(fields[4], 10, 64)
+	timeStamp, err := strconv.ParseInt(fields[4], 10, 64)
 	if err != nil {
 		return Trade{}, err
 	}
+	trade.Timestamp = NewTimeUnit(timeStamp)
 	trade.IsBuyerMaker = fields[5] == "True"
 	trade.IsBestMatch = When[bool](tradeType == SPOT_TRADE).Then(fields[6] == "True").Else(false)
 	return trade, nil

@@ -50,7 +50,7 @@ func Unique[T time.Duration | string](slice []T) []T {
 	return list
 }
 
-func Sort[T int64 | int](slice []T, desc bool) []T {
+func Sort[T TimeUnit | int64 | int](slice []T, desc bool) []T {
 	ret := make([]T, len(slice))
 	copy(ret, slice)
 	if desc {

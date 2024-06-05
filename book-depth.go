@@ -4,7 +4,6 @@ import (
 	"math"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // the key is the percentage of the book depth
@@ -27,15 +26,15 @@ type SingleBookDepth struct {
 
 type SingleBookDepthTime struct {
 	SingleBookDepth
-	Time int64 `json:"time"`
+	Time TimeUnit `json:"time"`
 }
 
 type SingleBookDepthList []SingleBookDepth
 
 // the key is the timestamp
-type FullBookDepthTickMap map[int64]FullBookDepthTick
+type FullBookDepthTickMap map[TimeUnit]FullBookDepthTick
 
-func newEmptyFullBookDepthTickTime(time int64) *FullBookDepthTickTime {
+func newEmptyFullBookDepthTickTime(time TimeUnit) *FullBookDepthTickTime {
 	ret := make(FullBookDepthTickTime, 10)
 	for i := -5; i <= 5; i++ {
 		if i != 0 {
@@ -51,14 +50,14 @@ func newEmptyFullBookDepthTickTime(time int64) *FullBookDepthTickTime {
 	return &ret
 }
 
-func (fdbtp *FullBookDepthTickMap) Keys(sortAsc bool) []int64 {
-	keys := make([]int64, len(*fdbtp))
+func (fdbtp *FullBookDepthTickMap) Keys(sortAsc bool) []TimeUnit {
+	keys := make([]TimeUnit, len(*fdbtp))
 	i := 0
 	for k := range *fdbtp {
 		keys[i] = k
 		i++
 	}
-	return Sort[int64](keys, !sortAsc)
+	return Sort[TimeUnit](keys, !sortAsc)
 }
 
 // returns the percentaages of the book depth sorted in ascending order
@@ -100,7 +99,7 @@ func AggregateSingleBookDepthTicks(ticks SingleBookDepthList) *SingleBookDepth {
 	return &ret
 }
 
-func (t *SingleBookDepth) ToTime(time int64) SingleBookDepthTime {
+func (t *SingleBookDepth) ToTime(time TimeUnit) SingleBookDepthTime {
 	return SingleBookDepthTime{
 		SingleBookDepth: *t,
 		Time:            time,
@@ -119,7 +118,7 @@ func (t *FullBookDepthTickTime) ToDefault() *FullBookDepthTick {
 	return &ret
 }
 
-func (t *FullBookDepthTick) ToTime(time int64) *FullBookDepthTickTime {
+func (t *FullBookDepthTick) ToTime(time TimeUnit) *FullBookDepthTickTime {
 	ret := make(FullBookDepthTickTime, len(*t))
 	for t, sbd := range *t {
 		ret[t] = sbd.ToTime(time)
@@ -171,13 +170,13 @@ func (fbdtt *FullBookDepthTickTime) IsFilled() bool {
 	return true
 }
 
-func (fbdtt *FullBookDepthTickTime) Time() time.Time {
+func (fbdtt *FullBookDepthTickTime) Time() TimeUnit {
 	for _, sbdt := range *fbdtt {
 		if sbdt.Time > 0 {
-			return time.Unix(sbdt.Time, 0)
+			return sbdt.Time
 		}
 	}
-	return time.Unix(0, 0)
+	return 0
 }
 
 func (fbd FullBookDepthTick) Stringify(decimals int8) string {

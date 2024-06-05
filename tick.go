@@ -81,16 +81,16 @@ func (t *Tick) StandardDeviationString() string {
 	return Format.Float(t.StandardDeviation, 3)
 }
 
-type TickMap map[int64]Tick
+type TickMap map[TimeUnit]Tick
 
 type TickTime struct {
 	Tick
-	Time int64 `json:"time"`
+	Time TimeUnit `json:"time"`
 }
 
 type TickTimeArray []TickTime
 
-func (t *Tick) ToTickTime(time int64) TickTime {
+func (t *Tick) ToTickTime(time TimeUnit) TickTime {
 	return TickTime{
 		Tick: *t,
 		Time: time,
@@ -141,7 +141,7 @@ func (tta *TickTimeArray) Sort(asc bool) TickTimeArray {
 func (tmap *TickMap) FilterInRange(t0 time.Time, t1 time.Time) TickMap {
 	ret := make(TickMap)
 	for time, tick := range *tmap {
-		if time >= t0.Unix() && time < t1.Unix() {
+		if time.ToTime().UnixNano() >= t0.UnixNano() && time.ToTime().UnixNano() < t1.UnixNano() {
 			ret[time] = tick
 		}
 	}
@@ -157,7 +157,7 @@ func (tmap *TickMap) Merge(t TickMap) TickMap {
 
 func (m *TickMap) DeleteInRange(t0 time.Time, t1 time.Time) {
 	for time := range *m {
-		if time >= t0.Unix() && time < t1.Unix() {
+		if time.ToTime().UnixNano() >= t0.UnixNano() && time.ToTime().UnixNano() < t1.UnixNano() {
 			delete(*m, time)
 		}
 	}
@@ -189,7 +189,7 @@ func (tick Tick) Stringify(decimals int8) string {
 	ret += Format.Float(tick.StandardDeviation, 3) + "|"
 	ret += Format.Float(tick.AbsolutePriceSum, -1)
 	if tick.PrevBookDepth != nil {
-		ret += "|" + strconv.FormatInt(tick.PrevBookDepth.Time().Unix(), 10)
+		ret += "|" + tick.PrevBookDepth.Time().String()
 	}
 
 	return ret
@@ -215,7 +215,7 @@ func ParseTick(str string) Tick {
 	var pbd *FullBookDepthTickTime = nil
 	if len(split) == 15 {
 		prevBookDepthTime, _ := strconv.ParseInt(split[14], 10, 64)
-		pbd = newEmptyFullBookDepthTickTime(prevBookDepthTime)
+		pbd = newEmptyFullBookDepthTickTime(NewTimeUnit(prevBookDepthTime))
 	}
 
 	return Tick{

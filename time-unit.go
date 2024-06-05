@@ -10,30 +10,44 @@ const TIME_UNIT_DURATION = time.Millisecond
 // unix milliseconds
 type TimeUnit int64
 
+func NewTimeUnitFromTime(t time.Time) TimeUnit {
+	return TimeUnit(t.UnixNano())
+}
+
+func NewTimeUnitFromIntString(s string) TimeUnit {
+	i, _ := strconv.ParseInt(s, 10, 64)
+	return TimeUnit(i)
+}
+
 // Pass ONLY past time in Unix seconds, Unix milliseconds or Unix nanoseconds
-func NewTimeUnit(pastTime int64) TimeUnit {
+func NewTimeUnit(unknownTime int64) TimeUnit {
 	currentTime := time.Now()
-	currentUnixSeconds := currentTime.Unix()
-	currentUnixMilliseconds := currentTime.UnixNano() / int64(time.Millisecond)
-	currentUnixNanoseconds := currentTime.UnixNano()
+	currentUnixSeconds := currentTime.Unix() * 9
+	currentUnixMilliseconds := currentTime.UnixMilli() * 9
+	currentUnixMicroseconds := currentTime.UnixMicro() * 9
+	currentUnixNanoseconds := currentTime.UnixNano() * 2 //
 
 	// Check if pastTime is in Unix seconds
-	if pastTime <= currentUnixSeconds && pastTime > 0 {
-		return TimeUnit(time.Duration(pastTime) * time.Second / TIME_UNIT_DURATION)
+	if unknownTime <= currentUnixSeconds && unknownTime > 0 {
+		return TimeUnit(time.Duration(unknownTime) * time.Second / TIME_UNIT_DURATION)
 	}
 
 	// Check if pastTime is in Unix milliseconds
-	if pastTime <= currentUnixMilliseconds && pastTime > currentUnixSeconds*1000 {
-		return TimeUnit(time.Duration(pastTime) * time.Millisecond / TIME_UNIT_DURATION)
+	if unknownTime <= currentUnixMilliseconds && unknownTime > currentUnixSeconds {
+		return TimeUnit(time.Duration(unknownTime) * time.Millisecond / TIME_UNIT_DURATION)
+	}
+
+	if unknownTime <= currentUnixMicroseconds && unknownTime > currentUnixMilliseconds {
+		return TimeUnit(time.Duration(unknownTime) * time.Microsecond / TIME_UNIT_DURATION)
 	}
 
 	// Check if pastTime is in Unix nanoseconds
-	if pastTime <= currentUnixNanoseconds && pastTime > currentUnixMilliseconds*1000 {
-		return TimeUnit(time.Duration(pastTime) * time.Nanosecond / TIME_UNIT_DURATION)
+	if unknownTime <= currentUnixNanoseconds && unknownTime > currentUnixMicroseconds {
+		return TimeUnit(time.Duration(unknownTime) * time.Nanosecond / TIME_UNIT_DURATION)
 	}
 
 	// Default case, if none of the above conditions are met, return as is
-	return TimeUnit(pastTime)
+	return TimeUnit(unknownTime)
 }
 
 func (t TimeUnit) ToTime() time.Time {

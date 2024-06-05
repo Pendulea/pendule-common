@@ -214,8 +214,7 @@ func ParseTick(str string) Tick {
 
 	var pbd *FullBookDepthTickTime = nil
 	if len(split) == 15 {
-		prevBookDepthTime, _ := strconv.ParseInt(split[14], 10, 64)
-		pbd = newEmptyFullBookDepthTickTime(NewTimeUnit(prevBookDepthTime))
+		pbd = newEmptyFullBookDepthTickTime(NewTimeUnitFromIntString(split[14]))
 	}
 
 	return Tick{

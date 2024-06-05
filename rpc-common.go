@@ -1,13 +1,13 @@
 package pcommon
 
 type IndicatorJSON struct {
-	Indicator     string `json:"indicator"`
-	LastIndexTime int64  `json:"last_index_time"`
+	Indicator     string   `json:"indicator"`
+	LastIndexTime TimeUnit `json:"last_index_time"`
 }
 
 type TimeframeJSON struct {
 	Timeframe     int64           `json:"timeframe"`
-	LastIndexTime int64           `json:"last_index_time"`
+	LastIndexTime TimeUnit        `json:"last_index_time"`
 	Indicators    []IndicatorJSON `json:"indicators"`
 }
 
@@ -64,18 +64,6 @@ type GetCandlesRequest struct {
 
 type GetCandlesResponse struct {
 	Candles TickTimeArray `json:"candles"`
-}
-
-type TickData struct {
-	Data any   `json:"data"`
-	Time int64 `json:"time"`
-}
-
-type TickDataArray []TickData
-
-type Index struct {
-	Indicator string        `json:"indicator"`
-	Indexes   TickDataArray `json:"indexes"`
 }
 
 type GetIndexesResponse struct {

@@ -14,8 +14,9 @@ const WEEK = 7 * DAY
 const MONTH = 30 * DAY
 const QUARTER = 90 * DAY
 
-const MIN_TIME_FRAME = time.Second
+const MIN_TIME_FRAME = time.Millisecond * 1000
 const MAX_TIME_FRAME = QUARTER
+const TIME_UNIT_DURATION = time.Millisecond
 
 type env struct {
 	ARCHIVES_DIR              string

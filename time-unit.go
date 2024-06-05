@@ -5,18 +5,16 @@ import (
 	"time"
 )
 
-const TIME_UNIT_DURATION = time.Millisecond
-
 // unix milliseconds
 type TimeUnit int64
 
 func NewTimeUnitFromTime(t time.Time) TimeUnit {
-	return TimeUnit(t.UnixNano())
+	return NewTimeUnit(t.UnixNano())
 }
 
 func NewTimeUnitFromIntString(s string) TimeUnit {
 	i, _ := strconv.ParseInt(s, 10, 64)
-	return TimeUnit(i)
+	return NewTimeUnit(i)
 }
 
 // Pass ONLY past time in Unix seconds, Unix milliseconds or Unix nanoseconds
@@ -58,12 +56,8 @@ func (t TimeUnit) Int() int64 {
 	return int64(t)
 }
 
-func TimeToUnit(t time.Time) TimeUnit {
-	return TimeUnit(t.UnixNano() / int64(TIME_UNIT_DURATION))
-}
-
 func (t TimeUnit) Add(d time.Duration) TimeUnit {
-	return t + TimeUnit(d/time.Millisecond)
+	return t + TimeUnit(d/TIME_UNIT_DURATION)
 }
 
 func (t TimeUnit) String() string {
@@ -71,5 +65,5 @@ func (t TimeUnit) String() string {
 }
 
 func (t TimeUnit) Pretty() string {
-	return t.ToTime().Format("2006-01-02 15:04:05")
+	return t.ToTime().UTC().Format("2006-01-02 15:04:05")
 }

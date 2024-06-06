@@ -105,10 +105,6 @@ func (p *Pair) IsBinanceValid() bool {
 
 func (p *Pair) ErrorFilter(allowedStablePairs []string) error {
 
-	if p.MinHistoricalDay == "" {
-		return fmt.Errorf("min_historical_day is required")
-	}
-
 	if p.Binance {
 		if p.Symbol0 == "" || p.Symbol1 == "" {
 			return fmt.Errorf("symbol0 and symbol1 are required for binance pairs")

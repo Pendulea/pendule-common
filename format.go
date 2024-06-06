@@ -30,11 +30,11 @@ func (f format) TimeFrameToLabel(timeFrame time.Duration) (string, error) {
 	if timeFrame > MAX_TIME_FRAME {
 		return "", errors.New("time frame is too large")
 	}
-	if timeFrame < MIN_TIME_FRAME {
+	if timeFrame < Env.MIN_TIME_FRAME {
 		return "", errors.New("time frame is too small")
 	}
-	if timeFrame%MIN_TIME_FRAME != 0 {
-		return "", fmt.Errorf("time frame must be a multiple of %d seconds", MIN_TIME_FRAME/1000)
+	if timeFrame%Env.MIN_TIME_FRAME != 0 {
+		return "", fmt.Errorf("time frame must be a multiple of %d seconds", Env.MIN_TIME_FRAME/1000)
 	}
 
 	if timeFrame%WEEK == 0 {
@@ -49,7 +49,10 @@ func (f format) TimeFrameToLabel(timeFrame time.Duration) (string, error) {
 	if timeFrame%time.Minute == 0 {
 		return fmt.Sprintf("%dm", int64(timeFrame.Minutes())), nil
 	}
-	return fmt.Sprintf("%ds", int64(timeFrame.Seconds())), nil
+	if timeFrame%time.Second == 0 {
+		return fmt.Sprintf("%ds", int64(timeFrame.Seconds())), nil
+	}
+	return fmt.Sprintf("%dms", timeFrame.Milliseconds()), nil
 }
 
 // StrDateToDate converts a string date to a time.Time object

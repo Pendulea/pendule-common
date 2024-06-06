@@ -13,32 +13,41 @@ const DAY = 24 * time.Hour
 const WEEK = 7 * DAY
 const MONTH = 30 * DAY
 const QUARTER = 90 * DAY
-
-const MIN_TIME_FRAME = time.Millisecond * 1000
-const MAX_TIME_FRAME = QUARTER
 const TIME_UNIT_DURATION = time.Millisecond
 
+// const MIN_TIME_FRAME = TIME_UNIT_DURATION * 1000
+const MAX_TIME_FRAME = QUARTER
+
 type env struct {
-	ARCHIVES_DIR              string
-	DATABASES_DIR             string
-	MAX_SIMULTANEOUS_PARSING  int
-	PARSER_SERVER_PORT        string
-	INDEXER_SERVER_PORT       string
-	MAX_SIMULTANEOUS_INDEXING int
+	ARCHIVES_DIR             string
+	DATABASES_DIR            string
+	MAX_SIMULTANEOUS_PARSING int
+	PARSER_SERVER_PORT       string
+	MIN_TIME_FRAME           time.Duration
 }
 
 var Env = env{
-	ARCHIVES_DIR:              "archives",
-	DATABASES_DIR:             "databases",
-	MAX_SIMULTANEOUS_PARSING:  3,
-	MAX_SIMULTANEOUS_INDEXING: 3,
-	PARSER_SERVER_PORT:        "8889",
-	INDEXER_SERVER_PORT:       "8890",
+	ARCHIVES_DIR:             "archives",
+	DATABASES_DIR:            "databases",
+	MAX_SIMULTANEOUS_PARSING: 3,
+	PARSER_SERVER_PORT:       "8889",
+	MIN_TIME_FRAME:           1000 * TIME_UNIT_DURATION,
 }
 
 func (e env) Init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	// Archives directory
+	minTimeFrame := os.Getenv("MIN_TIME_FRAME")
+	if minTimeFrame != "" {
+		min, err := strconv.Atoi(minTimeFrame)
+		if err != nil {
+			log.Fatal("Error parsing MIN_TIME_FRAME")
+		} else {
+			Env.MIN_TIME_FRAME = time.Duration(min) * time.Millisecond
+		}
 	}
 
 	// Archives directory
@@ -72,17 +81,6 @@ func (e env) Init() {
 		}
 	}
 
-	// Max simultaneous indexing workers
-	maxSimultaneousIndexing := os.Getenv("MAX_SIMULTANEOUS_INDEXING")
-	if maxSimultaneousIndexing != "" {
-		max, err := strconv.Atoi(maxSimultaneousIndexing)
-		if err != nil {
-			log.Fatal("Error parsing MAX_SIMULTANEOUS_INDEXING")
-		} else {
-			Env.MAX_SIMULTANEOUS_INDEXING = max
-		}
-	}
-
 	// Parser server port
 	parserServerPort := os.Getenv("PARSER_SERVER_PORT")
 	if parserServerPort != "" {
@@ -95,19 +93,5 @@ func (e env) Init() {
 			}
 		}
 		Env.PARSER_SERVER_PORT = strconv.Itoa(serverPortInt)
-	}
-
-	// Indexer server port
-	indexerServerPort := os.Getenv("INDEXER_SERVER_PORT")
-	if indexerServerPort != "" {
-		serverPortInt, err := strconv.Atoi(indexerServerPort)
-		if err != nil {
-			log.Fatal("Error parsing INDEXER_SERVER_PORT")
-		} else {
-			if serverPortInt < 0 || serverPortInt > 65535 {
-				log.Fatal("Invalid port INDEXER_SERVER_PORT")
-			}
-		}
-		Env.INDEXER_SERVER_PORT = strconv.Itoa(serverPortInt)
 	}
 }

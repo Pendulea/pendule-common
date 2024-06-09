@@ -23,6 +23,7 @@ type Tick struct {
 	StandardDeviation   float64                `json:"standard_deviation"`
 	AbsolutePriceSum    float64                `json:"absolute_price_sum"`
 	PrevBookDepth       *FullBookDepthTickTime `json:"prev_book_depth"`
+	PrevMetrics         *MetricsTime           `json:"prev_metrics"`
 }
 
 func (t *Tick) OpenString() string {
@@ -190,6 +191,13 @@ func (tick Tick) Stringify(decimals int8) string {
 	ret += Format.Float(tick.AbsolutePriceSum, -1)
 	if tick.PrevBookDepth != nil {
 		ret += "|" + tick.PrevBookDepth.Time().String()
+	} else {
+		ret += "|0"
+	}
+	if tick.PrevMetrics != nil {
+		ret += "|" + tick.PrevMetrics.Time.String()
+	} else {
+		ret += "|0"
 	}
 
 	return ret
@@ -213,8 +221,12 @@ func ParseTick(str string) Tick {
 	absolutePriceSum, _ := strconv.ParseFloat(split[13], 64)
 
 	var pbd *FullBookDepthTickTime = nil
-	if len(split) == 15 {
+	if len(split) > 14 && len(split[14]) > 0 && split[14] != "0" {
 		pbd = newEmptyFullBookDepthTickTime(NewTimeUnitFromIntString(split[14]))
+	}
+	var metrics *MetricsTime = nil
+	if len(split) > 15 && len(split[15]) > 0 && split[15] != "0" {
+		metrics = &MetricsTime{Time: NewTimeUnitFromIntString(split[15])}
 	}
 
 	return Tick{
@@ -233,6 +245,7 @@ func ParseTick(str string) Tick {
 		StandardDeviation:   standardDeviation,
 		AbsolutePriceSum:    absolutePriceSum,
 		PrevBookDepth:       pbd,
+		PrevMetrics:         metrics,
 	}
 }
 

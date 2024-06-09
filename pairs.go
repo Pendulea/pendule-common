@@ -49,6 +49,20 @@ func (p *Pair) BuildBookDepthArchiveFolderPath() string {
 	return path
 }
 
+func (p *Pair) BuildFuturesMetricsArchiveFolderPath() string {
+	path := fmt.Sprintf("%s/%s/%s", Env.ARCHIVES_DIR, p.BuildBinanceSymbol(), "metrics")
+	return path
+}
+
+func (p *Pair) BuildFuturesMetricsArchivesFilePath(date string, ext string) string {
+	fp := p.BuildFuturesMetricsArchiveFolderPath()
+	symbol := p.BuildBinanceSymbol()
+	if ext != "csv" && ext != "zip" {
+		log.Fatal("invalid extension for archive file")
+	}
+	return fmt.Sprintf("%s/%s-metrics-%s.%s", fp, symbol, date, ext)
+}
+
 func (p *Pair) BuildBookDepthArchivesFilePath(date string, ext string) string {
 	fp := p.BuildBookDepthArchiveFolderPath()
 	symbol := p.BuildBinanceSymbol()
@@ -127,6 +141,23 @@ func (p *Pair) ErrorFilter(allowedStablePairs []string) error {
 func (p *Pair) BuildBinanceSymbol() string {
 	if p.Binance {
 		return strings.ToUpper(p.Symbol0 + p.Symbol1)
+	}
+	return ""
+}
+
+func (pair *Pair) BuildBinanceFuturesMetricsArchiveURL(date string) string {
+	symbol := pair.BuildBinanceSymbol()
+	if symbol == "" {
+		return ""
+	}
+
+	if strings.Compare(pair.MinFuturesMetricsHistoricalDay, date) > 0 {
+		return ""
+	}
+
+	if pair.HasFutures {
+		fileName := fmt.Sprintf("%s-metrics-%s.zip", symbol, date)
+		return fmt.Sprintf("https://data.binance.vision/data/futures/um/daily/metrics/%s/%s", symbol, fileName)
 	}
 	return ""
 }

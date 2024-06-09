@@ -31,29 +31,58 @@ func parseMetricsFromCSVLine(fields []string) (FuturesMetrics, error) {
 	}
 	m.CreateTime.Truncate(time.Minute)
 	m.Symbol = fields[1]
-	m.SumOpenInterest, err = strconv.ParseFloat(fields[2], 64)
-	if err != nil {
-		return FuturesMetrics{}, err
+	if fields[2] != "" {
+		m.SumOpenInterest, err = strconv.ParseFloat(fields[2], 64)
+		if err != nil {
+			return FuturesMetrics{}, err
+		}
+	} else {
+		m.SumOpenInterest = 0
 	}
-	m.SumOpenInterestValue, err = strconv.ParseFloat(fields[3], 64)
-	if err != nil {
-		return FuturesMetrics{}, err
+
+	if fields[3] != "" {
+		m.SumOpenInterestValue, err = strconv.ParseFloat(fields[3], 64)
+		if err != nil {
+			return FuturesMetrics{}, err
+		}
+	} else {
+		m.SumOpenInterestValue = 0
 	}
-	m.CountTopTraderLongShortRatio, err = strconv.ParseFloat(fields[4], 64)
-	if err != nil {
-		return FuturesMetrics{}, err
+
+	if fields[4] != "" {
+		m.CountTopTraderLongShortRatio, err = strconv.ParseFloat(fields[4], 64)
+		if err != nil {
+			return FuturesMetrics{}, err
+		}
+	} else {
+		m.CountTopTraderLongShortRatio = 0
 	}
-	m.SumTopTraderLongShortRatio, err = strconv.ParseFloat(fields[5], 64)
-	if err != nil {
-		return FuturesMetrics{}, err
+
+	if fields[5] != "" {
+		m.SumTopTraderLongShortRatio, err = strconv.ParseFloat(fields[5], 64)
+		if err != nil {
+			return FuturesMetrics{}, err
+		}
+	} else {
+		m.SumTopTraderLongShortRatio = 0
 	}
-	m.CountLongShortRatio, err = strconv.ParseFloat(fields[6], 64)
-	if err != nil {
-		return FuturesMetrics{}, err
+
+	if fields[6] != "" {
+		m.CountLongShortRatio, err = strconv.ParseFloat(fields[6], 64)
+		if err != nil {
+			return FuturesMetrics{}, err
+		}
+	} else {
+		m.CountLongShortRatio = 0
 	}
-	m.SumTakerLongShortVolRatio, err = strconv.ParseFloat(fields[7], 64)
-	if err != nil {
-		return FuturesMetrics{}, err
+
+	if fields[7] != "" {
+		m.SumTakerLongShortVolRatio, err = strconv.ParseFloat(fields[7], 64)
+		if err != nil {
+			return FuturesMetrics{}, err
+		}
+	} else {
+		m.SumTakerLongShortVolRatio = 0
 	}
 
 	return m, nil

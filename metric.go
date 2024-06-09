@@ -16,7 +16,15 @@ type Metric struct {
 	Count  int     `json:"count"`
 }
 
+func (m *Metric) IsEmpty() bool {
+	return m.Count == 0
+}
+
 func newMetric(v float64) Metric {
+	if v == 0 {
+		return Metric{}
+	}
+
 	return Metric{
 		Open:   v,
 		High:   v,
@@ -112,6 +120,7 @@ func parseMetric(s string) Metric {
 	avg, _ := strconv.ParseFloat(splited[4], 64)
 	median, _ := strconv.ParseFloat(splited[5], 64)
 	count, _ := strconv.Atoi(splited[6])
+
 	return Metric{
 		Open:   open,
 		High:   high,

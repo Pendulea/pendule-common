@@ -10,6 +10,7 @@ import (
 
 type FuturesMetrics struct {
 	CreateTime                   time.Time `json:"create_time"`
+	Symbol                       string    `json:"symbol"`
 	SumOpenInterest              float64   `json:"sum_open_interest"`
 	SumOpenInterestValue         float64   `json:"sum_open_interest_value"`
 	CountTopTraderLongShortRatio float64   `json:"count_toptrader_long_short_ratio"`
@@ -29,27 +30,28 @@ func parseMetricsFromCSVLine(fields []string) (FuturesMetrics, error) {
 		return FuturesMetrics{}, err
 	}
 	m.CreateTime.Truncate(time.Minute)
-	m.SumOpenInterest, err = strconv.ParseFloat(fields[1], 64)
+	m.Symbol = fields[1]
+	m.SumOpenInterest, err = strconv.ParseFloat(fields[2], 64)
 	if err != nil {
 		return FuturesMetrics{}, err
 	}
-	m.SumOpenInterestValue, err = strconv.ParseFloat(fields[2], 64)
+	m.SumOpenInterestValue, err = strconv.ParseFloat(fields[3], 64)
 	if err != nil {
 		return FuturesMetrics{}, err
 	}
-	m.CountTopTraderLongShortRatio, err = strconv.ParseFloat(fields[3], 64)
+	m.CountTopTraderLongShortRatio, err = strconv.ParseFloat(fields[4], 64)
 	if err != nil {
 		return FuturesMetrics{}, err
 	}
-	m.SumTopTraderLongShortRatio, err = strconv.ParseFloat(fields[4], 64)
+	m.SumTopTraderLongShortRatio, err = strconv.ParseFloat(fields[5], 64)
 	if err != nil {
 		return FuturesMetrics{}, err
 	}
-	m.CountLongShortRatio, err = strconv.ParseFloat(fields[5], 64)
+	m.CountLongShortRatio, err = strconv.ParseFloat(fields[6], 64)
 	if err != nil {
 		return FuturesMetrics{}, err
 	}
-	m.SumTakerLongShortVolRatio, err = strconv.ParseFloat(fields[6], 64)
+	m.SumTakerLongShortVolRatio, err = strconv.ParseFloat(fields[7], 64)
 	if err != nil {
 		return FuturesMetrics{}, err
 	}

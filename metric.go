@@ -2,6 +2,7 @@ package pcommon
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -14,6 +15,28 @@ type Metric struct {
 	Avg    float64 `json:"avg"`
 	Median float64 `json:"median"`
 	Count  int     `json:"count"`
+}
+
+func aggregateMetrics(list []Metric) Metric {
+	ret := Metric{}
+	closes := []float64{}
+	for i, metric := range list {
+		if metric.Count == 0 {
+			continue
+		}
+		if i == 0 {
+			ret.Open = metric.Open
+		}
+		ret.High = math.Max(ret.High, metric.High)
+		ret.Low = math.Min(ret.Low, metric.Low)
+		ret.Close = metric.Close
+		ret.Count += metric.Count
+		closes = append(closes, metric.Close)
+	}
+
+	ret.Avg = Math.SafeAverage(closes)
+	ret.Median = Math.SafeMedian(closes)
+	return ret
 }
 
 func (m *Metric) IsEmpty() bool {
@@ -176,4 +199,29 @@ func (t *Metric) MedianString(decimals int8) string {
 
 func (t *Metric) CountString() string {
 	return strconv.Itoa(t.Count)
+}
+
+func (list MetricsArray) Aggregate() Metrics {
+
+	CountLongShortRatios := make([]Metric, len(list))
+	CountTopTraderLongShortRatios := make([]Metric, len(list))
+	SumOpenInterests := make([]Metric, len(list))
+	SumTopTraderLongShortRatios := make([]Metric, len(list))
+	SumTakerLongShortVolRatios := make([]Metric, len(list))
+
+	for i, m := range list {
+		CountLongShortRatios[i] = m.CountLongShortRatio
+		CountTopTraderLongShortRatios[i] = m.CountTopTraderLongShortRatio
+		SumOpenInterests[i] = m.SumOpenInterest
+		SumTopTraderLongShortRatios[i] = m.SumTopTraderLongShortRatio
+		SumTakerLongShortVolRatios[i] = m.SumTakerLongShortVolRatio
+	}
+
+	return Metrics{
+		CountLongShortRatio:          aggregateMetrics(CountLongShortRatios),
+		CountTopTraderLongShortRatio: aggregateMetrics(CountTopTraderLongShortRatios),
+		SumOpenInterest:              aggregateMetrics(SumOpenInterests),
+		SumTopTraderLongShortRatio:   aggregateMetrics(SumTopTraderLongShortRatios),
+		SumTakerLongShortVolRatio:    aggregateMetrics(SumTakerLongShortVolRatios),
+	}
 }

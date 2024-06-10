@@ -20,15 +20,13 @@ type Metric struct {
 func aggregateMetrics(list []Metric) Metric {
 	ret := Metric{}
 	closes := []float64{}
-	for i, metric := range list {
-		if metric.Count == 0 {
+	for _, metric := range list {
+		if metric.Count == 0 || metric.Open <= 0.00 {
 			continue
 		}
-		if i == 0 {
-			ret.Open = metric.Open
-		}
+		ret.Open = metric.Open
 		ret.High = math.Max(ret.High, metric.High)
-		if ret.Low == 0 {
+		if ret.Low <= 0.00 {
 			ret.Low = metric.Low
 		} else {
 			ret.Low = math.Min(ret.Low, metric.Low)
@@ -48,7 +46,7 @@ func (m *Metric) IsEmpty() bool {
 }
 
 func newMetric(v float64) Metric {
-	if v == 0 {
+	if v <= 0.00 {
 		return Metric{}
 	}
 

@@ -28,7 +28,11 @@ func aggregateMetrics(list []Metric) Metric {
 			ret.Open = metric.Open
 		}
 		ret.High = math.Max(ret.High, metric.High)
-		ret.Low = math.Min(ret.Low, metric.Low)
+		if ret.Low == 0 {
+			ret.Low = metric.Low
+		} else {
+			ret.Low = math.Min(ret.Low, metric.Low)
+		}
 		ret.Close = metric.Close
 		ret.Count += metric.Count
 		closes = append(closes, metric.Close)

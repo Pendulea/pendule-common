@@ -66,10 +66,22 @@ func (s *SetSettings) IsValid() error {
 	}
 
 	for _, asset := range s.Assets {
-		fieldVal := v.FieldByName(string(asset.ID))
-		if !fieldVal.IsValid() {
+
+		found := false
+		for i := 0; i < v.NumField(); i++ {
+			val := v.Field(i)
+			if !val.IsValid() {
+				return fmt.Errorf("no such field: %s", asset.ID)
+			}
+			if val.String() == string(asset.ID) {
+				found = true
+				break
+			}
+		}
+		if !found {
 			return fmt.Errorf("no such field: %s", asset.ID)
 		}
+
 		_, err := Format.StrDateToDate(asset.MinDataDate)
 		if err != nil {
 			return err

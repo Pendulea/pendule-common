@@ -96,7 +96,7 @@ func (s *SetSettings) IsSupportedBinancePair() (bool, []AssetType) {
 		return false, listSupportedAssets
 	}
 
-	if len(s.ID) == 3 {
+	if len(s.ID) == 2 {
 		denominatorPair := strings.ToUpper(s.ID[1])
 		if !strings.HasPrefix(denominatorPair, "USDC") && !strings.HasPrefix(denominatorPair, "USDT") {
 			return false, listSupportedAssets
@@ -104,8 +104,7 @@ func (s *SetSettings) IsSupportedBinancePair() (bool, []AssetType) {
 		if s.HasSettingValue("binance") != 1 {
 			return false, listSupportedAssets
 		}
-		lastIDKey := s.ID[2]
-		if lastIDKey != "_spot" && lastIDKey != "_futures" {
+		if s.HasSettingValue("futures") != 1 && s.HasSettingValue("spot") != 1 {
 			return false, listSupportedAssets
 		}
 

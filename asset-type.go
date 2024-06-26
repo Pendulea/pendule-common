@@ -3,8 +3,11 @@ package pcommon
 type AssetType string
 
 var Asset = struct {
-	PRICE  AssetType
-	VOLUME AssetType
+	SPOT_PRICE  AssetType
+	SPOT_VOLUME AssetType
+
+	FUTURES_PRICE  AssetType
+	FUTURES_VOLUME AssetType
 
 	BOOK_DEPTH_P1 AssetType
 	BOOK_DEPTH_P2 AssetType
@@ -26,8 +29,11 @@ var Asset = struct {
 
 	CIRCULATING_SUPPLY AssetType
 }{
-	PRICE:  "price",
-	VOLUME: "volume",
+	SPOT_PRICE:  "spot_price",
+	SPOT_VOLUME: "spot_volume",
+
+	FUTURES_PRICE:  "futures_price",
+	FUTURES_VOLUME: "futures_volume",
 
 	BOOK_DEPTH_P1: "bd-p1",
 	BOOK_DEPTH_P2: "bd-p2",

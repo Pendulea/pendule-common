@@ -14,40 +14,27 @@ const WEEK = 7 * DAY
 const MONTH = 30 * DAY
 const QUARTER = 90 * DAY
 
-// const MIN_TIME_FRAME = TIME_UNIT_DURATION * 1000
 const MAX_TIME_FRAME = QUARTER
 
 type env struct {
-	ARCHIVES_DIR                      string
-	DATABASES_DIR                     string
-	MAX_SIMULTANEOUS_PARSING          int
-	PARSER_SERVER_PORT                string
-	MIN_TIME_FRAME                    time.Duration
-	MAX_DAYS_BACKWARD_FOR_CONSISTENCY int
+	ARCHIVES_DIR             string
+	DATABASES_DIR            string
+	MAX_SIMULTANEOUS_PARSING int
+	PARSER_SERVER_PORT       string
+	MIN_TIME_FRAME           time.Duration
 }
 
 var Env = env{
-	ARCHIVES_DIR:                      "archives",
-	DATABASES_DIR:                     "databases",
-	MAX_SIMULTANEOUS_PARSING:          3,
-	PARSER_SERVER_PORT:                "8889",
-	MIN_TIME_FRAME:                    1000 * TIME_UNIT_DURATION,
-	MAX_DAYS_BACKWARD_FOR_CONSISTENCY: 2,
+	ARCHIVES_DIR:             "archives",
+	DATABASES_DIR:            "databases",
+	MAX_SIMULTANEOUS_PARSING: 3,
+	PARSER_SERVER_PORT:       "8889",
+	MIN_TIME_FRAME:           1000 * TIME_UNIT_DURATION,
 }
 
 func (e env) Init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
-	}
-
-	minDaysBackwardForConsistency := os.Getenv("MAX_DAYS_BACKWARD_FOR_CONSISTENCY")
-	if minDaysBackwardForConsistency != "" {
-		min, err := strconv.Atoi(minDaysBackwardForConsistency)
-		if err != nil {
-			log.Fatal("Error parsing MAX_DAYS_BACKWARD_FOR_CONSISTENCY")
-		} else {
-			Env.MAX_DAYS_BACKWARD_FOR_CONSISTENCY = min
-		}
 	}
 
 	// Archives directory

@@ -13,7 +13,6 @@ const DAY = 24 * time.Hour
 const WEEK = 7 * DAY
 const MONTH = 30 * DAY
 const QUARTER = 90 * DAY
-const TIME_UNIT_DURATION = time.Millisecond
 
 // const MIN_TIME_FRAME = TIME_UNIT_DURATION * 1000
 const MAX_TIME_FRAME = QUARTER

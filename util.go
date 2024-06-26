@@ -2,7 +2,6 @@ package pcommon
 
 import (
 	"regexp"
-	"time"
 )
 
 func ContainsDigit(s string) bool {
@@ -29,28 +28,7 @@ func ChunkString(s string, n int) []string {
 	return result
 }
 
-func Contains[T time.Duration | int64](slice []T, value T) bool {
-	for _, item := range slice {
-		if item == value {
-			return true
-		}
-	}
-	return false
-}
-
-func Unique[T time.Duration | string](slice []T) []T {
-	keys := make(map[T]bool)
-	list := []T{}
-	for _, entry := range slice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
-	}
-	return list
-}
-
-func Sort[T TimeUnit | int64 | int](slice []T, desc bool) []T {
+func Sort[T int64 | int](slice []T, desc bool) []T {
 	ret := make([]T, len(slice))
 	copy(ret, slice)
 	if desc {

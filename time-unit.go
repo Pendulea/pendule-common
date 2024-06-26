@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const TIME_UNIT_DURATION = time.Millisecond
+
 // unix milliseconds
 type TimeUnit int64
 

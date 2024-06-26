@@ -1,0 +1,51 @@
+package pcommon
+
+type AssetType string
+
+var Asset = struct {
+	PRICE  AssetType
+	VOLUME AssetType
+
+	BOOK_DEPTH_P1 AssetType
+	BOOK_DEPTH_P2 AssetType
+	BOOK_DEPTH_P3 AssetType
+	BOOK_DEPTH_P4 AssetType
+	BOOK_DEPTH_P5 AssetType
+
+	BOOK_DEPTH_M1 AssetType
+	BOOK_DEPTH_M2 AssetType
+	BOOK_DEPTH_M3 AssetType
+	BOOK_DEPTH_M4 AssetType
+	BOOK_DEPTH_M5 AssetType
+
+	METRIC_SUM_OPEN_INTEREST                 AssetType
+	METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO AssetType
+	METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO   AssetType
+	METRIC_COUNT_LONG_SHORT_RATIO            AssetType
+	METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO    AssetType
+
+	CIRCULATING_SUPPLY AssetType
+}{
+	PRICE:  "price",
+	VOLUME: "volume",
+
+	BOOK_DEPTH_P1: "bd-p1",
+	BOOK_DEPTH_P2: "bd-p2",
+	BOOK_DEPTH_P3: "bd-p3",
+	BOOK_DEPTH_P4: "bd-p4",
+	BOOK_DEPTH_P5: "bd-p5",
+
+	BOOK_DEPTH_M1: "bd-m1",
+	BOOK_DEPTH_M2: "bd-m2",
+	BOOK_DEPTH_M3: "bd-m3",
+	BOOK_DEPTH_M4: "bd-m4",
+	BOOK_DEPTH_M5: "bd-m5",
+
+	METRIC_SUM_OPEN_INTEREST:                 "metrics_sum_open_interest",
+	METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO: "metrics_count_toptrader_long_short_ratio",
+	METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO:   "metrics_sum_toptrader_long_short_ratio",
+	METRIC_COUNT_LONG_SHORT_RATIO:            "metrics_count_long_short_ratio",
+	METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO:    "metrics_sum_taker_long_short_vol_ratio",
+
+	CIRCULATING_SUPPLY: "circulating_supply",
+}

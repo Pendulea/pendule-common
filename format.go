@@ -140,9 +140,9 @@ func (f format) AccurateHumanize(d time.Duration) string {
 	return fmt.Sprintf("%dw", weeks)
 }
 
-func (f format) BuildSetID(symbol string, tradeType TradeType) string {
-	return symbol + tradeType.Key()
-}
+// func (f format) BuildSetID(symbol string, tradeType TradeType) string {
+// 	return symbol + tradeType.Key()
+// }
 
 func (f format) CuteHash(s string) string {
 	var h int

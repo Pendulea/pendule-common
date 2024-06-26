@@ -52,7 +52,7 @@ func (s *SetSettings) HasSettingValue(id string) int64 {
 	return 0
 }
 
-func (s *SetSettings) isValid() error {
+func (s *SetSettings) IsValid() error {
 	if len(s.ID) == 0 {
 		return errors.New("ID is empty")
 	}
@@ -92,7 +92,7 @@ func (s *SetSettings) IsSupportedBinancePair() (bool, []AssetType) {
 		d.CIRCULATING_SUPPLY,
 	}
 
-	if s.isValid() != nil {
+	if s.IsValid() != nil {
 		return false, listSupportedAssets
 	}
 
@@ -104,10 +104,6 @@ func (s *SetSettings) IsSupportedBinancePair() (bool, []AssetType) {
 		if s.HasSettingValue("binance") != 1 {
 			return false, listSupportedAssets
 		}
-		if s.HasSettingValue("futures") != 1 && s.HasSettingValue("spot") != 1 {
-			return false, listSupportedAssets
-		}
-
 		for _, asset := range s.Assets {
 			if lo.IndexOf(listSupportedAssets, asset.ID) == -1 || asset.Decimals > 6 {
 				return false, listSupportedAssets

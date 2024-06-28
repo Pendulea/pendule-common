@@ -65,6 +65,8 @@ func (s *SetSettings) IsValid() error {
 		return fmt.Errorf("expected a struct or a pointer to a struct")
 	}
 
+	assetFound := map[string]bool{}
+
 	for _, asset := range s.Assets {
 
 		found := false
@@ -74,6 +76,10 @@ func (s *SetSettings) IsValid() error {
 				return fmt.Errorf("no such field: %s", asset.ID)
 			}
 			if val.String() == string(asset.ID) {
+				if assetFound[string(asset.ID)] {
+					return fmt.Errorf("duplicate asset: %s", asset.ID)
+				}
+				assetFound[string(asset.ID)] = true
 				found = true
 				break
 			}
@@ -88,6 +94,14 @@ func (s *SetSettings) IsValid() error {
 		}
 		if asset.Decimals < 0 || asset.Decimals > 12 {
 			return fmt.Errorf("decimals out of range: %d", asset.Decimals)
+		}
+
+		settingsFound := map[string]bool{}
+		for _, setting := range s.Settings {
+			if settingsFound[setting.ID] {
+				return fmt.Errorf("duplicate setting: %s", setting.ID)
+			}
+			settingsFound[setting.ID] = true
 		}
 	}
 

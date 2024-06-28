@@ -197,8 +197,10 @@ func (f format) Float(val float64, precision int8) string {
 	str := strconv.FormatFloat(val, 'f', int(precision), 64)
 
 	// Remove trailing zeros and the decimal point if it's not needed
-	str = strings.TrimRight(str, "0")
-	str = strings.TrimRight(str, ".")
+	if strings.Contains(str, ".") {
+		str = strings.TrimRight(str, "0")
+		str = strings.TrimRight(str, ".")
+	}
 
 	if str == "" {
 		return "0"

@@ -10,17 +10,21 @@ import (
 	"github.com/samber/lo"
 )
 
+type SetLittleSetting struct {
+	ID    string `json:"id"`
+	Value int64  `json:"value"`
+}
+
+type AssetSettings struct {
+	ID          AssetType `json:"id"`
+	MinDataDate string    `json:"min_data_date"`
+	Decimals    int8      `json:"decimals"`
+}
+
 type SetSettings struct {
-	Assets []struct {
-		ID          AssetType `json:"id"`
-		MinDataDate string    `json:"min_data_date"`
-		Decimals    int8      `json:"decimals"`
-	} `json:"assets"`
-	ID       []string `json:"id"`
-	Settings []struct {
-		ID    string `json:"id"`
-		Value int64  `json:"value"`
-	} `json:"settings"`
+	Assets   []AssetSettings    `json:"assets"`
+	ID       []string           `json:"id"`
+	Settings []SetLittleSetting `json:"settings"`
 }
 
 func (s SetSettings) IDString() string {
@@ -138,6 +142,17 @@ func (s *SetSettings) IsSupportedBinancePair() (bool, []AssetType) {
 		return true, listSupportedAssets
 	}
 	return false, listSupportedAssets
+}
+
+func (s *SetSettings) Copy() *SetSettings {
+	var r SetSettings
+
+	r.ID = s.ID
+	r.Settings = make([]SetLittleSetting, len(s.Settings))
+	copy(r.Settings, s.Settings)
+	r.Assets = make([]AssetSettings, len(s.Assets))
+	copy(r.Assets, s.Assets)
+	return &r
 }
 
 func (s *SetSettings) BuildArchiveFolderPath(asset AssetType) string {

@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/samber/lo"
 	"github.com/shopspring/decimal"
 )
 
@@ -96,6 +97,24 @@ func (lst UnitTimeArray) First() Data {
 	}
 	ret := lst[0]
 	return &ret
+}
+
+func (list UnitTimeArray) ToJSON(columns []ColumnName) ([]map[ColumnName]interface{}, error) {
+	for _, col := range columns {
+		if lo.IndexOf(UNIT_COLUNMS, col) == -1 {
+			return nil, fmt.Errorf("column %s not found", col)
+		}
+	}
+
+	return filterToMap(list, columns)
+}
+
+func (lst UnitTimeArray) Map() []Data {
+	ret := make([]Data, len(lst))
+	for i, v := range lst {
+		ret[i] = v
+	}
+	return ret
 }
 
 func (lst UnitTimeArray) RemoveFirstN(n int) DataList {

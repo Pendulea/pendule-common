@@ -1,6 +1,8 @@
 package pcommon
 
 import (
+	"fmt"
+	"reflect"
 	"regexp"
 )
 
@@ -49,4 +51,58 @@ func Sort[T int64 | int](slice []T, desc bool) []T {
 		}
 	}
 	return ret
+}
+
+func getFieldByJSONTag(item Data, jsonTag string) (interface{}, bool) {
+	v := reflect.ValueOf(item)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+
+	// Check fields in Quantity struct
+	quantityVal := v.Field(0)
+	quantityType := quantityVal.Type()
+	for i := 0; i < quantityType.NumField(); i++ {
+		field := quantityType.Field(i)
+		tag := field.Tag.Get("json")
+		if tag == jsonTag {
+			return quantityVal.Field(i).Interface(), true
+		}
+	}
+
+	// Check fields in QuantityTime struct itself
+	t := v.Type()
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		tag := field.Tag.Get("json")
+		if tag == jsonTag {
+			return v.Field(i).Interface(), true
+		}
+	}
+
+	return nil, false
+}
+
+func filterToMap(data DataList, fields []ColumnName) ([]map[ColumnName]interface{}, error) {
+	var filteredData []map[ColumnName]interface{}
+
+	for _, item := range data.Map() {
+		mappedItem := make(map[ColumnName]interface{})
+
+		for _, field := range fields {
+			if field == "time" {
+				mappedItem[field] = reflect.ValueOf(item).FieldByName("Time").Interface()
+				continue
+			}
+			v, ok := getFieldByJSONTag(item, string(field))
+			if !ok {
+				return nil, fmt.Errorf("field %s not found", field)
+			} else {
+				mappedItem[field] = v
+			}
+		}
+		filteredData = append(filteredData, mappedItem)
+	}
+
+	return filteredData, nil
 }

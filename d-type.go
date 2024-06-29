@@ -89,6 +89,8 @@ type DataList interface {
 	Prepend(pt Data) DataList
 	Len() int
 	RemoveFirstN(n int) DataList
+	Map() []Data
+	ToJSON(columns []ColumnName) ([]map[ColumnName]interface{}, error)
 }
 
 type DataType int8

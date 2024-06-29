@@ -1,9 +1,12 @@
 package pcommon
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/samber/lo"
 )
 
 type Point struct {
@@ -20,6 +23,24 @@ type PointTimeArray []PointTime
 func (lst PointTimeArray) Aggregate(timeframe time.Duration, newTime TimeUnit) Data {
 	log.Fatal("no aggregation for points data")
 	return PointTime{}
+}
+
+func (lst PointTimeArray) Map() []Data {
+	ret := make([]Data, len(lst))
+	for i, v := range lst {
+		ret[i] = v
+	}
+	return ret
+}
+
+func (list PointTimeArray) ToJSON(columns []ColumnName) ([]map[ColumnName]interface{}, error) {
+	for _, col := range columns {
+		if lo.IndexOf(POINT_COLUMNS, col) == -1 {
+			return nil, fmt.Errorf("column %s not found", col)
+		}
+	}
+
+	return filterToMap(list, columns)
 }
 
 func (lst PointTimeArray) Append(pt Data) DataList {

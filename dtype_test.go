@@ -1,6 +1,7 @@
 package pcommon
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -33,6 +34,17 @@ func TestUnitAggregation(t *testing.T) {
 	for _, price := range listPrices {
 		units0 = append(units0, NewUnit(price).ToTime(t0))
 	}
+
+	list, err := units0.ToJSON(UNIT_COLUNMS)
+	assert.Equal(t, nil, err, "Error should be nil")
+
+	for i, v := range list {
+		JSON1, _ := json.Marshal(v)
+		q1 := UnitTime{}
+		json.Unmarshal(JSON1, &q1)
+		assert.Equal(t, q1, NewUnit(listPrices[i]).ToTime(t0))
+	}
+
 	agg1 := units0.Aggregate(time.Second, t0).(UnitTime)
 	assert.Equal(t, 0.01506, agg1.Open, "Open should be 0.01506000")
 	assert.Equal(t, 0.074, agg1.High, "High should be 0.07400000")
@@ -107,6 +119,17 @@ func TestUnitQuantity(t *testing.T) {
 	for _, volume := range listVolumes {
 		arr = append(arr, NewQuantity(volume).ToTime(vt))
 	}
+
+	list, err := arr.ToJSON(QUANTITY_COLUMNS)
+	assert.Equal(t, nil, err, "Error should be nil")
+
+	for i, v := range list {
+		JSON1, _ := json.Marshal(v)
+		q1 := QuantityTime{}
+		json.Unmarshal(JSON1, &q1)
+		assert.Equal(t, q1, NewQuantity(listVolumes[i]).ToTime(vt))
+	}
+
 	agg := arr.Aggregate(time.Second, vt).(QuantityTime)
 	assert.Equal(t, 13790.5, agg.Plus, "Plus should be 13790.5")
 	assert.Equal(t, int64(6), agg.PlusCount, "PlusCount should be 6")

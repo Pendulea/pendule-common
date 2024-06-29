@@ -7,17 +7,19 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
 )
 
 type Quantity struct {
 	Plus  float64 `json:"plus"`
 	Minus float64 `json:"minus"`
 
-	PlusAvg  float64 `json:"plus_avg"`
-	MinusAvg float64 `json:"minus_avg"`
+	PlusAvg  float64 `json:"plus_average"`
+	MinusAvg float64 `json:"minus_average"`
 
-	PlusMed  float64 `json:"plus_med"`  // median
-	MinusMed float64 `json:"minus_med"` // median
+	PlusMed  float64 `json:"plus_median"`  // median
+	MinusMed float64 `json:"minus_median"` // median
 
 	PlusCount  int64 `json:"plus_count"`  // count
 	MinusCount int64 `json:"minus_count"` // count
@@ -91,6 +93,24 @@ func (lst QuantityTimeArray) RemoveFirstN(n int) DataList {
 		return PointTimeArray{}
 	}
 	return lst[n:]
+}
+
+func (list QuantityTimeArray) ToJSON(columns []ColumnName) ([]map[ColumnName]interface{}, error) {
+	for _, col := range columns {
+		if lo.IndexOf(QUANTITY_COLUMNS, col) == -1 {
+			return nil, fmt.Errorf("column %s not found", col)
+		}
+	}
+
+	return filterToMap(list, columns)
+}
+
+func (lst QuantityTimeArray) Map() []Data {
+	ret := make([]Data, len(lst))
+	for i, v := range lst {
+		ret[i] = v
+	}
+	return ret
 }
 
 func (list QuantityTimeArray) Aggregate(timeframe time.Duration, newTime TimeUnit) Data {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/samber/lo"
@@ -131,7 +132,22 @@ func (s *SetSettings) IsValid() error {
 			depFound[string(fullID)] = true
 		}
 	}
-
+	//check assets one by one
+	for _, asset := range s.Assets {
+		//RSI
+		if asset.ID == Asset.RSI {
+			if len(asset.IDArguments) != 1 {
+				return fmt.Errorf("RSI asset requires 1 argument")
+			}
+			parseInt, err := strconv.Atoi(asset.IDArguments[0])
+			if err != nil {
+				return err
+			}
+			if parseInt < 5 {
+				return fmt.Errorf("RSI asset requires argument[0] >= int(5)")
+			}
+		}
+	}
 	return nil
 }
 

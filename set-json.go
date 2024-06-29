@@ -17,6 +17,7 @@ type AssetJSON struct {
 	Consistencies              []Consistency `json:"consistencies"`
 	ConsistencyMaxLookbackDays int           `json:"consistency_max_lookback_days"`
 	SubAssets                  []AssetJSON   `json:"sub_assets"`
+	Arguments                  []string      `json:"arguments"`
 }
 
 type SetJSON struct {

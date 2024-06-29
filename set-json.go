@@ -5,14 +5,18 @@ import (
 	"fmt"
 )
 
+type Consistency struct {
+	Range     [2]TimeUnit `json:"range"`
+	Timeframe int64       `json:"timeframe"` // in milliseconds
+}
+
 type AssetJSON struct {
-	ID                         AssetType   `json:"id"`
-	Precision                  int8        `json:"precision"`
-	Type                       DataType    `json:"type"`
-	ConsistencyRange           [2]TimeUnit `json:"consistency_range"`
-	ConsistencyMaxLookbackDays int         `json:"consistency_max_lookback_days"`
-	Timeframe                  int64       `json:"timeframe"` // in milliseconds
-	SubAssets                  []AssetJSON `json:"sub_assets"`
+	ID                         AssetType     `json:"id"`
+	Precision                  int8          `json:"precision"`
+	Type                       DataType      `json:"type"`
+	Consistencies              []Consistency `json:"consistencies"`
+	ConsistencyMaxLookbackDays int           `json:"consistency_max_lookback_days"`
+	SubAssets                  []AssetJSON   `json:"sub_assets"`
 }
 
 type SetJSON struct {

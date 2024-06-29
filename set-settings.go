@@ -136,8 +136,8 @@ func (s *SetSettings) IsValid() error {
 	for _, asset := range s.Assets {
 		//RSI
 		if asset.ID == Asset.RSI {
-			if len(asset.IDArguments) != 1 {
-				return fmt.Errorf("RSI asset requires 1 argument")
+			if len(asset.IDArguments) != 1 && len(asset.Dependencies) != 1 {
+				return fmt.Errorf("RSI asset requires 1 argument and 1 dependency")
 			}
 			parseInt, err := strconv.Atoi(asset.IDArguments[0])
 			if err != nil {
@@ -146,6 +146,10 @@ func (s *SetSettings) IsValid() error {
 			if parseInt < 5 {
 				return fmt.Errorf("RSI asset requires argument[0] >= int(5)")
 			}
+		}
+
+		if len(asset.Dependencies) > 0 && lo.IndexOf(ASSET_LIST_WITHOUT_DEPENDENCIES, asset.ID) != -1 {
+			return fmt.Errorf("asset %s has dependencies", asset.ID)
 		}
 	}
 	return nil

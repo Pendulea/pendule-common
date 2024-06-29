@@ -34,6 +34,7 @@ var Asset = struct {
 	METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO    AssetType
 
 	CIRCULATING_SUPPLY AssetType
+	RSI                AssetType
 }{
 	SPOT_PRICE:  "spot_price",
 	SPOT_VOLUME: "spot_volume",
@@ -60,6 +61,7 @@ var Asset = struct {
 	METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO:    "metrics_sum_taker_long_short_vol_ratio",
 
 	CIRCULATING_SUPPLY: "circulating_supply",
+	RSI:                "rsi",
 }
 
 func (asset AssetType) GetBookDepthAssetPercentage() (int, error) {

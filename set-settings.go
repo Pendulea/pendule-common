@@ -15,10 +15,17 @@ type SetLittleSetting struct {
 	Value int64  `json:"value"`
 }
 
+type AssetDependency struct {
+	AssetID AssetType `json:"asset_id"`
+	SetID   string    `json:"set_id"`
+}
+
 type AssetSettings struct {
-	ID          AssetType `json:"id"`
-	MinDataDate string    `json:"min_data_date"`
-	Decimals    int8      `json:"decimals"`
+	ID           AssetType         `json:"id"`
+	Dependencies []AssetDependency `json:"dependencies"`
+	MinDataDate  string            `json:"min_data_date"`
+	Decimals     int8              `json:"decimals"`
+	IDArguments  []string          `json:"id_arguments"`
 }
 
 type SetSettings struct {
@@ -70,6 +77,7 @@ func (s *SetSettings) IsValid() error {
 	}
 
 	assetFound := map[string]bool{}
+	allAssets := map[string]bool{}
 
 	for _, asset := range s.Assets {
 
@@ -79,6 +87,7 @@ func (s *SetSettings) IsValid() error {
 			if !val.IsValid() {
 				return fmt.Errorf("no such field: %s", asset.ID)
 			}
+			allAssets[val.String()] = true
 			if val.String() == string(asset.ID) {
 				if assetFound[string(asset.ID)] {
 					return fmt.Errorf("duplicate asset: %s", asset.ID)
@@ -109,6 +118,20 @@ func (s *SetSettings) IsValid() error {
 		}
 	}
 
+	for _, a := range s.Assets {
+		depFound := map[string]bool{}
+		for _, dep := range a.Dependencies {
+			fullID := string(dep.SetID) + string(dep.AssetID)
+			if !allAssets[string(dep.AssetID)] {
+				return fmt.Errorf("asset does not exist: %s", dep.AssetID)
+			}
+			if depFound[string(fullID)] {
+				return fmt.Errorf("duplicate dependency: %s", dep)
+			}
+			depFound[string(fullID)] = true
+		}
+	}
+
 	return nil
 }
 
@@ -135,8 +158,10 @@ func (s *SetSettings) IsSupportedBinancePair() (bool, []AssetType) {
 			return false, listSupportedAssets
 		}
 		for _, asset := range s.Assets {
-			if lo.IndexOf(listSupportedAssets, asset.ID) == -1 || asset.Decimals > 6 {
-				return false, listSupportedAssets
+			if len(asset.Dependencies) == 0 {
+				if lo.IndexOf(listSupportedAssets, asset.ID) == -1 || asset.Decimals > 6 {
+					return false, listSupportedAssets
+				}
 			}
 		}
 		return true, listSupportedAssets

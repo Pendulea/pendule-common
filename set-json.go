@@ -7,7 +7,7 @@ import (
 
 type Consistency struct {
 	Range     [2]TimeUnit `json:"range"`
-	Timeframe int64       `json:"timeframe"` // in milliseconds
+	Timeframe int64       `json:"timeframe"`
 }
 
 type AssetJSON struct {

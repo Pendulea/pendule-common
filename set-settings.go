@@ -1,11 +1,8 @@
 package pcommon
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
-	"reflect"
-	"strconv"
 	"strings"
 
 	"github.com/samber/lo"
@@ -14,19 +11,6 @@ import (
 type SetLittleSetting struct {
 	ID    string `json:"id"`
 	Value int64  `json:"value"`
-}
-
-type AssetDependency struct {
-	AssetID AssetType `json:"asset_id"`
-	SetID   string    `json:"set_id"`
-}
-
-type AssetSettings struct {
-	ID           AssetType         `json:"id"`
-	Dependencies []AssetDependency `json:"dependencies"`
-	MinDataDate  string            `json:"min_data_date"`
-	Decimals     int8              `json:"decimals"`
-	IDArguments  []string          `json:"id_arguments"`
 }
 
 type SetSettings struct {
@@ -43,9 +27,9 @@ func (s SetSettings) DBPath() string {
 	return filepath.Join(Env.DATABASES_DIR, strings.ToLower(s.IDString()))
 }
 
-func (s SetSettings) ContainsAsset(assetID AssetType) bool {
+func (s SetSettings) ContainsAssetAddress(address AssetAddress) bool {
 	for _, asset := range s.Assets {
-		if asset.ID == assetID {
+		if asset.Address.BuildAddress() == address {
 			return true
 		}
 	}
@@ -65,41 +49,25 @@ func (s *SetSettings) HasSettingValue(id string) int64 {
 }
 
 func (s *SetSettings) IsValid() error {
-	if len(s.ID) == 0 {
-		return errors.New("ID is empty")
+
+	for _, id := range s.ID {
+		id = strings.TrimSpace(id)
+		if !isAlphanumeric(id) || id == "" {
+			return fmt.Errorf("id contains non-alphanumeric characters: %s", strings.Join(s.ID, "_"))
+		}
 	}
 
-	v := reflect.ValueOf(Asset)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
-	}
-	if v.Kind() != reflect.Struct {
-		return fmt.Errorf("expected a struct or a pointer to a struct")
-	}
-
-	assetFound := map[string]bool{}
-	allAssets := map[string]bool{}
-
+	addresseFound := map[AssetAddress]bool{}
 	for _, asset := range s.Assets {
 
-		found := false
-		for i := 0; i < v.NumField(); i++ {
-			val := v.Field(i)
-			if !val.IsValid() {
-				return fmt.Errorf("no such field: %s", asset.ID)
-			}
-			allAssets[val.String()] = true
-			if val.String() == string(asset.ID) {
-				if assetFound[string(asset.ID)] {
-					return fmt.Errorf("duplicate asset: %s", asset.ID)
-				}
-				assetFound[string(asset.ID)] = true
-				found = true
-				break
-			}
+		if err := asset.Address.IsValid(); err != nil {
+			return err
 		}
-		if !found {
-			return fmt.Errorf("no such field: %s", asset.ID)
+
+		assetAddress := asset.Address.BuildAddress()
+
+		if _, ok := addresseFound[assetAddress]; ok {
+			return fmt.Errorf("duplicate asset address: %s", assetAddress)
 		}
 
 		_, err := Format.StrDateToDate(asset.MinDataDate)
@@ -119,74 +87,48 @@ func (s *SetSettings) IsValid() error {
 		}
 	}
 
-	for _, a := range s.Assets {
-		depFound := map[string]bool{}
-		for _, dep := range a.Dependencies {
-			fullID := string(dep.SetID) + string(dep.AssetID)
-			if !allAssets[string(dep.AssetID)] {
-				return fmt.Errorf("asset does not exist: %s", dep.AssetID)
-			}
-			if depFound[string(fullID)] {
-				return fmt.Errorf("duplicate dependency: %s", dep)
-			}
-			depFound[string(fullID)] = true
-		}
-	}
-	//check assets one by one
-	for _, asset := range s.Assets {
-		//RSI
-		if asset.ID == Asset.RSI {
-			if len(asset.IDArguments) != 1 && len(asset.Dependencies) != 1 {
-				return fmt.Errorf("RSI asset requires 1 argument and 1 dependency")
-			}
-			parseInt, err := strconv.Atoi(asset.IDArguments[0])
-			if err != nil {
-				return err
-			}
-			if parseInt < 5 {
-				return fmt.Errorf("RSI asset requires argument[0] >= int(5)")
-			}
-		}
-
-		if len(asset.Dependencies) > 0 && lo.IndexOf(ASSET_LIST_WITHOUT_DEPENDENCIES, asset.ID) != -1 {
-			return fmt.Errorf("asset %s has dependencies", asset.ID)
-		}
-	}
 	return nil
 }
 
-func (s *SetSettings) IsSupportedBinancePair() (bool, []AssetType) {
-	d := Asset
-	listSupportedAssets := []AssetType{
-		d.FUTURES_PRICE, d.SPOT_PRICE,
-		d.FUTURES_VOLUME, d.SPOT_VOLUME,
-		d.BOOK_DEPTH_P1, d.BOOK_DEPTH_P2, d.BOOK_DEPTH_P3, d.BOOK_DEPTH_P4, d.BOOK_DEPTH_P5, d.BOOK_DEPTH_M1, d.BOOK_DEPTH_M2, d.BOOK_DEPTH_M3, d.BOOK_DEPTH_M4, d.BOOK_DEPTH_M5,
-		d.METRIC_SUM_OPEN_INTEREST, d.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO, d.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO, d.METRIC_COUNT_LONG_SHORT_RATIO, d.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO,
-		d.CIRCULATING_SUPPLY,
-	}
+func (s *SetSettings) GetSetType() (SetType, error) {
 
 	if s.IsValid() != nil {
-		return false, listSupportedAssets
+		return -1, fmt.Errorf("invalid set settings")
 	}
 
+	if err := s.IsBinancePair(); err == nil {
+		return BINANCE_PAIR, nil
+	}
+
+	return -1, fmt.Errorf("type does not exist")
+
+}
+
+func (s *SetSettings) IsBinancePair() error {
 	if len(s.ID) == 2 {
 		denominatorPair := strings.ToUpper(s.ID[1])
 		if !strings.HasPrefix(denominatorPair, "USDC") && !strings.HasPrefix(denominatorPair, "USDT") {
-			return false, listSupportedAssets
+			return fmt.Errorf("unsupported denominator pair")
 		}
 		if s.HasSettingValue("binance") != 1 {
-			return false, listSupportedAssets
+			return fmt.Errorf("no binance settings")
 		}
+		supportedAsset := BINANCE_PAIR.GetSupportedAssets()
 		for _, asset := range s.Assets {
-			if len(asset.Dependencies) == 0 {
-				if lo.IndexOf(listSupportedAssets, asset.ID) == -1 || asset.Decimals > 6 {
-					return false, listSupportedAssets
+
+			if len(asset.Address.Dependencies) == 0 && len(asset.Address.Arguments) == 0 {
+				if lo.IndexOf(supportedAsset, asset.Address.AssetType) == -1 {
+					return fmt.Errorf("unsupported asset")
+				}
+				if asset.Decimals > 6 {
+					return fmt.Errorf("decimals out of range")
 				}
 			}
 		}
-		return true, listSupportedAssets
+		return nil
 	}
-	return false, listSupportedAssets
+
+	return fmt.Errorf("not a binance pair")
 }
 
 func (s *SetSettings) Copy() *SetSettings {

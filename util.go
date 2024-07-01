@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"unicode"
 )
 
 func ContainsDigit(s string) bool {
@@ -105,4 +106,13 @@ func filterToMap(data DataList, fields []ColumnName) ([]map[ColumnName]interface
 	}
 
 	return filteredData, nil
+}
+
+func isAlphanumeric(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }

@@ -2,13 +2,14 @@ package pcommon
 
 import (
 	"errors"
+	"log"
+	"reflect"
 	"strconv"
 	"strings"
 )
 
 type AssetType string
-
-var Asset = struct {
+type AllAssetTypes struct {
 	SPOT_PRICE  AssetType
 	SPOT_VOLUME AssetType
 
@@ -35,7 +36,9 @@ var Asset = struct {
 
 	CIRCULATING_SUPPLY AssetType
 	RSI                AssetType
-}{
+}
+
+var Asset = AllAssetTypes{
 	SPOT_PRICE:  "spot_price",
 	SPOT_VOLUME: "spot_volume",
 
@@ -64,6 +67,20 @@ var Asset = struct {
 	RSI:                "rsi",
 }
 
+var AssetTypeMap = Asset.ToMap()
+
+func (a AllAssetTypes) ToMap() map[string]bool {
+	v := reflect.ValueOf(Asset)
+	if v.Kind() != reflect.Struct {
+		log.Fatal("expected a struct")
+	}
+	m := make(map[string]bool)
+	for i := 0; i < v.NumField(); i++ {
+		m[v.Field(i).String()] = true
+	}
+	return m
+}
+
 func (asset AssetType) GetBookDepthAssetPercentage() (int, error) {
 	if asset == Asset.BOOK_DEPTH_M1 || asset == Asset.BOOK_DEPTH_M2 || asset == Asset.BOOK_DEPTH_M3 || asset == Asset.BOOK_DEPTH_M4 || asset == Asset.BOOK_DEPTH_M5 ||
 		asset == Asset.BOOK_DEPTH_P1 || asset == Asset.BOOK_DEPTH_P2 || asset == Asset.BOOK_DEPTH_P3 || asset == Asset.BOOK_DEPTH_P4 || asset == Asset.BOOK_DEPTH_P5 {
@@ -86,62 +103,40 @@ func (asset AssetType) GetBookDepthAssetPercentage() (int, error) {
 
 type AssetStateConfig struct {
 	ID       AssetType
-	Key      [2]byte
 	DataType DataType
+
+	RequiredDependencyDataTypes []DataType
+	RequiredArgumentTypes       []reflect.Type
 }
 
 var DEFAULT_ASSETS = map[AssetType]AssetStateConfig{
 	//binance spot trades
-	Asset.SPOT_PRICE:  {Asset.SPOT_PRICE, [2]byte{0, 0}, UNIT},
-	Asset.SPOT_VOLUME: {Asset.SPOT_VOLUME, [2]byte{0, 1}, QUANTITY},
+	Asset.SPOT_PRICE:  {Asset.SPOT_PRICE, UNIT, nil, nil},
+	Asset.SPOT_VOLUME: {Asset.SPOT_VOLUME, QUANTITY, nil, nil},
 
 	//binance book depth
-	Asset.BOOK_DEPTH_P1: {Asset.BOOK_DEPTH_P1, [2]byte{0, 2}, UNIT},
-	Asset.BOOK_DEPTH_P2: {Asset.BOOK_DEPTH_P2, [2]byte{0, 3}, UNIT},
-	Asset.BOOK_DEPTH_P3: {Asset.BOOK_DEPTH_P3, [2]byte{0, 4}, UNIT},
-	Asset.BOOK_DEPTH_P4: {Asset.BOOK_DEPTH_P4, [2]byte{0, 5}, UNIT},
-	Asset.BOOK_DEPTH_P5: {Asset.BOOK_DEPTH_P5, [2]byte{0, 6}, UNIT},
+	Asset.BOOK_DEPTH_P1: {Asset.BOOK_DEPTH_P1, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_P2: {Asset.BOOK_DEPTH_P2, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_P3: {Asset.BOOK_DEPTH_P3, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_P4: {Asset.BOOK_DEPTH_P4, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_P5: {Asset.BOOK_DEPTH_P5, UNIT, nil, nil},
 
-	Asset.BOOK_DEPTH_M1: {Asset.BOOK_DEPTH_M1, [2]byte{0, 7}, UNIT},
-	Asset.BOOK_DEPTH_M2: {Asset.BOOK_DEPTH_M2, [2]byte{0, 8}, UNIT},
-	Asset.BOOK_DEPTH_M3: {Asset.BOOK_DEPTH_M3, [2]byte{0, 9}, UNIT},
-	Asset.BOOK_DEPTH_M4: {Asset.BOOK_DEPTH_M4, [2]byte{0, 10}, UNIT},
-	Asset.BOOK_DEPTH_M5: {Asset.BOOK_DEPTH_M5, [2]byte{0, 11}, UNIT},
+	Asset.BOOK_DEPTH_M1: {Asset.BOOK_DEPTH_M1, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_M2: {Asset.BOOK_DEPTH_M2, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_M3: {Asset.BOOK_DEPTH_M3, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_M4: {Asset.BOOK_DEPTH_M4, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_M5: {Asset.BOOK_DEPTH_M5, UNIT, nil, nil},
 
-	Asset.METRIC_SUM_OPEN_INTEREST:                 {Asset.METRIC_SUM_OPEN_INTEREST, [2]byte{0, 12}, UNIT},
-	Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO: {Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO, [2]byte{0, 13}, UNIT},
-	Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO:   {Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO, [2]byte{0, 14}, UNIT},
-	Asset.METRIC_COUNT_LONG_SHORT_RATIO:            {Asset.METRIC_COUNT_LONG_SHORT_RATIO, [2]byte{0, 15}, UNIT},
-	Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO:    {Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO, [2]byte{0, 16}, UNIT},
+	Asset.METRIC_SUM_OPEN_INTEREST:                 {Asset.METRIC_SUM_OPEN_INTEREST, UNIT, nil, nil},
+	Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO: {Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil},
+	Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO:   {Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil},
+	Asset.METRIC_COUNT_LONG_SHORT_RATIO:            {Asset.METRIC_COUNT_LONG_SHORT_RATIO, UNIT, nil, nil},
+	Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO:    {Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO, UNIT, nil, nil},
 
-	Asset.CIRCULATING_SUPPLY: {Asset.CIRCULATING_SUPPLY, [2]byte{0, 17}, UNIT},
+	Asset.CIRCULATING_SUPPLY: {Asset.CIRCULATING_SUPPLY, UNIT, nil, nil},
 
-	Asset.FUTURES_PRICE:  {Asset.FUTURES_PRICE, [2]byte{0, 18}, UNIT},
-	Asset.FUTURES_VOLUME: {Asset.FUTURES_VOLUME, [2]byte{0, 19}, QUANTITY},
+	Asset.FUTURES_PRICE:  {Asset.FUTURES_PRICE, UNIT, nil, nil},
+	Asset.FUTURES_VOLUME: {Asset.FUTURES_VOLUME, QUANTITY, nil, nil},
 
-	Asset.RSI: {Asset.RSI, [2]byte{0, 20}, POINT},
-}
-
-var ASSET_LIST_WITHOUT_DEPENDENCIES = []AssetType{
-	Asset.SPOT_PRICE,
-	Asset.SPOT_VOLUME,
-	Asset.FUTURES_PRICE,
-	Asset.FUTURES_VOLUME,
-	Asset.BOOK_DEPTH_P1,
-	Asset.BOOK_DEPTH_P2,
-	Asset.BOOK_DEPTH_P3,
-	Asset.BOOK_DEPTH_P4,
-	Asset.BOOK_DEPTH_P5,
-	Asset.BOOK_DEPTH_M1,
-	Asset.BOOK_DEPTH_M2,
-	Asset.BOOK_DEPTH_M3,
-	Asset.BOOK_DEPTH_M4,
-	Asset.BOOK_DEPTH_M5,
-	Asset.METRIC_SUM_OPEN_INTEREST,
-	Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO,
-	Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO,
-	Asset.METRIC_COUNT_LONG_SHORT_RATIO,
-
-	Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO,
-	Asset.CIRCULATING_SUPPLY,
+	Asset.RSI: {Asset.RSI, POINT, []DataType{UNIT}, []reflect.Type{reflect.TypeOf(int64(0))}},
 }

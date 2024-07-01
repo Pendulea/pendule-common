@@ -6,11 +6,11 @@ type Consistency struct {
 }
 
 type AssetJSON struct {
-	ID                         AssetType     `json:"id"`
-	Precision                  int8          `json:"precision"`
-	Type                       DataType      `json:"type"`
-	Consistencies              []Consistency `json:"consistencies"`
-	ConsistencyMaxLookbackDays int           `json:"consistency_max_lookback_days"`
-	Dependencies               []AssetJSON   `json:"dependencies"`
-	Arguments                  []string      `json:"arguments"`
+	AddressString              AssetAddress       `json:"address_string"`
+	Address                    AssetAddressParsed `json:"address"`
+	ConsistencyMaxLookbackDays int                `json:"consistency_max_lookback_days"`
+	Consistencies              []Consistency      `json:"consistencies"`
+	DataType                   DataType           `json:"data_type"`
+	Decimals                   int8               `json:"decimals"`
+	MinDataDate                string             `json:"min_data_date"`
 }

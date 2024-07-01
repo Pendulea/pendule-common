@@ -25,7 +25,7 @@ func (adp AssetAddressParsed) IsValid() error {
 	for at := range ArchivesIndex {
 		for _, assetType := range at.GetTargetedAssets() {
 			if adp.AssetType == assetType {
-				if len(adp.Dependencies) > 0 || len(adp.Arguments) > 0 {
+				if adp.HasArguments() || adp.HasDependencies() {
 					return fmt.Errorf("asset %s has dependencies or arguments but it should not", adp.AssetType)
 				}
 			}
@@ -98,6 +98,14 @@ type AssetAddressParsed struct {
 	AssetType    AssetType      `json:"asset_type"`
 	Dependencies []AssetAddress `json:"dependencies"`
 	Arguments    []string       `json:"arguments"`
+}
+
+func (aap AssetAddressParsed) HasDependencies() bool {
+	return len(aap.Dependencies) > 0
+}
+
+func (aap AssetAddressParsed) HasArguments() bool {
+	return len(aap.Arguments) > 0
 }
 
 func (address AssetAddress) Parse() (*AssetAddressParsed, error) {

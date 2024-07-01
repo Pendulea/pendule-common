@@ -1,0 +1,15 @@
+{
+		"id": ["CTSI", "USDT"],
+		"assets": [{
+            "address": [{
+                "asset_type": "spot_price",
+                "dependencies": [],
+                "arguments": []
+            }],
+			"min_data_date": "2020-05-05",
+			"decimals": 3
+		}],
+		"settings": {
+			"binance": 1
+        }
+}

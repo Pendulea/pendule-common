@@ -8,15 +8,10 @@ import (
 	"github.com/samber/lo"
 )
 
-type SetLittleSetting struct {
-	ID    string `json:"id"`
-	Value int64  `json:"value"`
-}
-
 type SetSettings struct {
-	Assets   []AssetSettings    `json:"assets"`
-	ID       []string           `json:"id"`
-	Settings []SetLittleSetting `json:"settings"`
+	Assets   []AssetSettings  `json:"assets"`
+	ID       []string         `json:"id"`
+	Settings map[string]int64 `json:"settings"`
 }
 
 func (s SetSettings) IDString() string {
@@ -29,7 +24,7 @@ func (s SetSettings) DBPath() string {
 
 func (s SetSettings) ContainsAssetAddress(address AssetAddress) bool {
 	for _, asset := range s.Assets {
-		if asset.Address.BuildAddress() == address {
+		if asset.Address.AddSetID(s.ID).BuildAddress() == address {
 			return true
 		}
 	}
@@ -40,16 +35,15 @@ func (s *SetSettings) HasSettingValue(id string) int64 {
 	if s.Settings == nil {
 		return 0
 	}
-	for _, setting := range s.Settings {
-		if setting.ID == id {
-			return setting.Value
-		}
+	if _, ok := s.Settings[id]; ok {
+		return s.Settings[id]
 	}
 	return 0
 }
 
 func (s *SetSettings) IsValid() error {
 
+	// Check for empty ID and invalid characters
 	for _, id := range s.ID {
 		id = strings.TrimSpace(id)
 		if !isAlphanumeric(id) || id == "" {
@@ -57,34 +51,27 @@ func (s *SetSettings) IsValid() error {
 		}
 	}
 
+	// Check for duplicate settings
+	settingsFound := map[string]bool{}
+	for key := range s.Settings {
+		if settingsFound[key] {
+			return fmt.Errorf("duplicate setting: %s", key)
+		}
+		settingsFound[key] = true
+	}
+
+	// Check for duplicate asset addresses and validate assets
 	addresseFound := map[AssetAddress]bool{}
 	for _, asset := range s.Assets {
 
-		if err := asset.Address.IsValid(); err != nil {
+		if err := asset.IsValid(*s); err != nil {
 			return err
 		}
-
-		assetAddress := asset.Address.BuildAddress()
-
+		assetAddress := asset.Address.AddSetID(s.ID).BuildAddress()
 		if _, ok := addresseFound[assetAddress]; ok {
 			return fmt.Errorf("duplicate asset address: %s", assetAddress)
 		}
-
-		_, err := Format.StrDateToDate(asset.MinDataDate)
-		if err != nil {
-			return err
-		}
-		if asset.Decimals < 0 || asset.Decimals > 12 {
-			return fmt.Errorf("decimals out of range: %d", asset.Decimals)
-		}
-
-		settingsFound := map[string]bool{}
-		for _, setting := range s.Settings {
-			if settingsFound[setting.ID] {
-				return fmt.Errorf("duplicate setting: %s", setting.ID)
-			}
-			settingsFound[setting.ID] = true
-		}
+		addresseFound[assetAddress] = true
 	}
 
 	return nil
@@ -116,8 +103,9 @@ func (s *SetSettings) IsBinancePair() error {
 		supportedAsset := BINANCE_PAIR.GetSupportedAssets()
 		for _, asset := range s.Assets {
 
-			if len(asset.Address.Dependencies) == 0 && len(asset.Address.Arguments) == 0 {
-				if lo.IndexOf(supportedAsset, asset.Address.AssetType) == -1 {
+			assetAddress := asset.Address.AddSetID(s.ID)
+			if !assetAddress.HasArguments() && !assetAddress.HasDependencies() {
+				if lo.IndexOf(supportedAsset, assetAddress.AssetType) == -1 {
 					return fmt.Errorf("unsupported asset")
 				}
 				if asset.Decimals > 6 {
@@ -135,8 +123,10 @@ func (s *SetSettings) Copy() *SetSettings {
 	var r SetSettings
 
 	r.ID = s.ID
-	r.Settings = make([]SetLittleSetting, len(s.Settings))
-	copy(r.Settings, s.Settings)
+	r.Settings = make(map[string]int64, len(s.Settings))
+	for k, v := range s.Settings {
+		r.Settings[k] = v
+	}
 	r.Assets = make([]AssetSettings, len(s.Assets))
 	copy(r.Assets, s.Assets)
 	return &r

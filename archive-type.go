@@ -60,7 +60,7 @@ func (at ArchiveType) GetTargetedAssets() []AssetType {
 	})
 }
 
-func GetRequiredArchiveType(assetType AssetType) *ArchiveType {
+func (assetType AssetType) GetRequiredArchiveType() *ArchiveType {
 	for arcT := range ArchivesIndex {
 		if lo.IndexOf(arcT.GetTargetedAssets(), assetType) != -1 {
 			return &arcT

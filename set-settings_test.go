@@ -57,4 +57,5 @@ func TestSetJSON(t *testing.T) {
 		Decimals: 3,
 	})
 	assert.NotEqual(t, set.IsValid(), nil, "Set should be invalid")
+
 }

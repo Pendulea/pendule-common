@@ -101,7 +101,7 @@ func (lst UnitTimeArray) First() Data {
 
 func (list UnitTimeArray) ToJSON(columns []ColumnName) ([]map[ColumnName]interface{}, error) {
 	for _, col := range columns {
-		if lo.IndexOf(UNIT_COLUNMS, col) == -1 {
+		if lo.IndexOf(UNIT.Columns(), col) == -1 {
 			return nil, fmt.Errorf("column %s not found", col)
 		}
 	}

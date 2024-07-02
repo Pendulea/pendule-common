@@ -107,48 +107,99 @@ type AssetStateConfig struct {
 
 	RequiredDependencyDataTypes []DataType
 	RequiredArgumentTypes       []reflect.Type
+	Label                       string
+	Description                 string
 }
 
 type AvailableAssets map[AssetType]AssetStateConfig
 
 var DEFAULT_ASSETS = AvailableAssets{
 	//binance spot trades
-	Asset.SPOT_PRICE:  {Asset.SPOT_PRICE, UNIT, nil, nil},
-	Asset.SPOT_VOLUME: {Asset.SPOT_VOLUME, QUANTITY, nil, nil},
+	Asset.SPOT_PRICE: {
+		Asset.SPOT_PRICE, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.SPOT_VOLUME: {Asset.SPOT_VOLUME, QUANTITY, nil, nil,
+		"", "",
+	},
 
 	//binance book depth
-	Asset.BOOK_DEPTH_P1: {Asset.BOOK_DEPTH_P1, UNIT, nil, nil},
-	Asset.BOOK_DEPTH_P2: {Asset.BOOK_DEPTH_P2, UNIT, nil, nil},
-	Asset.BOOK_DEPTH_P3: {Asset.BOOK_DEPTH_P3, UNIT, nil, nil},
-	Asset.BOOK_DEPTH_P4: {Asset.BOOK_DEPTH_P4, UNIT, nil, nil},
-	Asset.BOOK_DEPTH_P5: {Asset.BOOK_DEPTH_P5, UNIT, nil, nil},
+	Asset.BOOK_DEPTH_P1: {Asset.BOOK_DEPTH_P1, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_P2: {Asset.BOOK_DEPTH_P2, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_P3: {Asset.BOOK_DEPTH_P3, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_P4: {Asset.BOOK_DEPTH_P4, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_P5: {Asset.BOOK_DEPTH_P5, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_M1: {Asset.BOOK_DEPTH_M1, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_M2: {Asset.BOOK_DEPTH_M2, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_M3: {Asset.BOOK_DEPTH_M3, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_M4: {Asset.BOOK_DEPTH_M4, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.BOOK_DEPTH_M5: {Asset.BOOK_DEPTH_M5, UNIT, nil, nil,
+		"", "",
+	},
 
-	Asset.BOOK_DEPTH_M1: {Asset.BOOK_DEPTH_M1, UNIT, nil, nil},
-	Asset.BOOK_DEPTH_M2: {Asset.BOOK_DEPTH_M2, UNIT, nil, nil},
-	Asset.BOOK_DEPTH_M3: {Asset.BOOK_DEPTH_M3, UNIT, nil, nil},
-	Asset.BOOK_DEPTH_M4: {Asset.BOOK_DEPTH_M4, UNIT, nil, nil},
-	Asset.BOOK_DEPTH_M5: {Asset.BOOK_DEPTH_M5, UNIT, nil, nil},
+	Asset.METRIC_SUM_OPEN_INTEREST: {Asset.METRIC_SUM_OPEN_INTEREST, UNIT, nil, nil,
+		"", "",
+	},
 
-	Asset.METRIC_SUM_OPEN_INTEREST:                 {Asset.METRIC_SUM_OPEN_INTEREST, UNIT, nil, nil},
-	Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO: {Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil},
-	Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO:   {Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil},
-	Asset.METRIC_COUNT_LONG_SHORT_RATIO:            {Asset.METRIC_COUNT_LONG_SHORT_RATIO, UNIT, nil, nil},
-	Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO:    {Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO, UNIT, nil, nil},
+	Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO: {Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO: {Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.METRIC_COUNT_LONG_SHORT_RATIO: {Asset.METRIC_COUNT_LONG_SHORT_RATIO, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO: {Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO, UNIT, nil, nil,
+		"", "",
+	},
 
-	Asset.CIRCULATING_SUPPLY: {Asset.CIRCULATING_SUPPLY, UNIT, nil, nil},
+	Asset.CIRCULATING_SUPPLY: {Asset.CIRCULATING_SUPPLY, UNIT, nil, nil,
+		"", "",
+	},
 
-	Asset.FUTURES_PRICE:  {Asset.FUTURES_PRICE, UNIT, nil, nil},
-	Asset.FUTURES_VOLUME: {Asset.FUTURES_VOLUME, QUANTITY, nil, nil},
+	Asset.FUTURES_PRICE: {Asset.FUTURES_PRICE, UNIT, nil, nil,
+		"", "",
+	},
+	Asset.FUTURES_VOLUME: {Asset.FUTURES_VOLUME, QUANTITY, nil, nil,
+		"", "",
+	},
 
-	Asset.RSI: {Asset.RSI, POINT, []DataType{UNIT}, []reflect.Type{reflect.TypeOf(int64(0))}},
+	Asset.RSI: {Asset.RSI, POINT, []DataType{UNIT}, []reflect.Type{reflect.TypeOf(int64(0))},
+		"RSI", "",
+	},
 }
 
 type AvailableAssetJSON struct {
 	AssetType AssetType `json:"asset_type"`
 	DataType  DataType  `json:"data_type"`
 
-	Dependencies  []DataType `json:"dependencies"`
-	ArgumentTypes []string   `json:"argument_types"`
+	Dependencies        []DataType   `json:"dependencies"`
+	ArgumentTypes       []string     `json:"argument_types"`
+	Label               string       `json:"label"`
+	Description         string       `json:"description"`
+	DataTypeName        string       `json:"data_type_name"`
+	DataTypeColor       string       `json:"data_type_color"`
+	DataTypeColumns     []ColumnName `json:"data_type_columns"`
+	DataTypeDescription string       `json:"data_type_description"`
 }
 
 func (aa AvailableAssets) JSON() []AvailableAssetJSON {
@@ -159,10 +210,16 @@ func (aa AvailableAssets) JSON() []AvailableAssetJSON {
 			argumentTypes = append(argumentTypes, arg.String())
 		}
 		ret = append(ret, AvailableAssetJSON{
-			AssetType:     v.ID,
-			DataType:      v.DataType,
-			Dependencies:  v.RequiredDependencyDataTypes,
-			ArgumentTypes: argumentTypes,
+			AssetType:           v.ID,
+			DataType:            v.DataType,
+			DataTypeName:        v.DataType.String(),
+			DataTypeColor:       v.DataType.Color(),
+			DataTypeColumns:     v.DataType.Columns(),
+			DataTypeDescription: v.DataType.Description(),
+			Dependencies:        v.RequiredDependencyDataTypes,
+			ArgumentTypes:       argumentTypes,
+			Label:               v.Label,
+			Description:         v.Description,
 		})
 	}
 	return ret

@@ -70,7 +70,3 @@ func (c CSVCheckListRequirement) Columns() []ColumnName {
 	})
 	return result
 }
-
-var UNIT_COLUNMS = []ColumnName{ColumnType.TIME, ColumnType.OPEN, ColumnType.HIGH, ColumnType.LOW, ColumnType.CLOSE, ColumnType.AVERAGE, ColumnType.MEDIAN, ColumnType.ABSOLUTE_SUM, ColumnType.COUNT}
-var QUANTITY_COLUMNS = []ColumnName{ColumnType.TIME, ColumnType.PLUS, ColumnType.MINUS, ColumnType.PLUS_AVERAGE, ColumnType.MINUS_AVERAGE, ColumnType.PLUS_MEDIAN, ColumnType.MINUS_MEDIAN, ColumnType.PLUS_COUNT, ColumnType.MINUS_COUNT}
-var POINT_COLUMNS = []ColumnName{ColumnType.TIME, ColumnType.VALUE}

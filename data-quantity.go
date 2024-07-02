@@ -97,7 +97,7 @@ func (lst QuantityTimeArray) RemoveFirstN(n int) DataList {
 
 func (list QuantityTimeArray) ToJSON(columns []ColumnName) ([]map[ColumnName]interface{}, error) {
 	for _, col := range columns {
-		if lo.IndexOf(QUANTITY_COLUMNS, col) == -1 {
+		if lo.IndexOf(QUANTITY.Columns(), col) == -1 {
 			return nil, fmt.Errorf("column %s not found", col)
 		}
 	}

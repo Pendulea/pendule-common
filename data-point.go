@@ -35,7 +35,7 @@ func (lst PointTimeArray) Map() []Data {
 
 func (list PointTimeArray) ToJSON(columns []ColumnName) ([]map[ColumnName]interface{}, error) {
 	for _, col := range columns {
-		if lo.IndexOf(POINT_COLUMNS, col) == -1 {
+		if lo.IndexOf(POINT.Columns(), col) == -1 {
 			return nil, fmt.Errorf("column %s not found", col)
 		}
 	}

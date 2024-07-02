@@ -35,7 +35,7 @@ func TestUnitAggregation(t *testing.T) {
 		units0 = append(units0, NewUnit(price).ToTime(t0))
 	}
 
-	list, err := units0.ToJSON(UNIT_COLUNMS)
+	list, err := units0.ToJSON(UNIT.Columns())
 	assert.Equal(t, nil, err, "Error should be nil")
 
 	for i, v := range list {
@@ -120,7 +120,7 @@ func TestUnitQuantity(t *testing.T) {
 		arr = append(arr, NewQuantity(volume).ToTime(vt))
 	}
 
-	list, err := arr.ToJSON(QUANTITY_COLUMNS)
+	list, err := arr.ToJSON(QUANTITY.Columns())
 	assert.Equal(t, nil, err, "Error should be nil")
 
 	for i, v := range list {

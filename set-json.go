@@ -8,6 +8,7 @@ import (
 type SetJSON struct {
 	Settings SetSettings `json:"settings"`
 	Size     int64       `json:"size"`
+	Type     SetType     `json:"type"`
 	Assets   []AssetJSON `json:"assets"`
 }
 

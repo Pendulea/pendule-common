@@ -5,7 +5,7 @@ type RessourcesJSON struct {
 	AvailableSetTypes []SetTypeJSON        `json:"available_set_types"`
 }
 
-func buildRessources() RessourcesJSON {
+func BuildRessources() RessourcesJSON {
 	res := RessourcesJSON{}
 	for s := range SET_ARCHIVES {
 		res.AvailableSetTypes = append(res.AvailableSetTypes, s.JSON())

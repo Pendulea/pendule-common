@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/samber/lo"
 )
 
 type AssetAddress string
@@ -98,6 +100,47 @@ type AssetAddressParsed struct {
 	AssetType    AssetType      `json:"asset_type"`
 	Dependencies []AssetAddress `json:"dependencies"`
 	Arguments    []string       `json:"arguments"`
+}
+
+func (aap AssetAddressParsed) BuildCSVColumnName(includeSetID bool) (string, error) {
+	dep := []AssetAddressParsed{}
+
+	for _, depAddr := range aap.Dependencies {
+		dp, err := depAddr.Parse()
+		if err != nil {
+			return "", err
+		}
+		dep = append(dep, *dp)
+	}
+
+	argumentStr := strings.Join(aap.Arguments, "|")
+	var err2 error = nil
+	depStr := strings.Join(lo.Map(dep, func(d AssetAddressParsed, i int) string {
+		str, err := d.BuildCSVColumnName(includeSetID)
+		if err != nil {
+			err2 = err
+			return ""
+		}
+		return str
+	}), "|")
+
+	if err2 != nil {
+		return "", err2
+	}
+
+	ret := []string{}
+	if includeSetID {
+		ret = append(ret, strings.ToLower(strings.Join(aap.SetID, "")))
+	}
+	ret = append(ret, string(aap.AssetType))
+	if argumentStr != "" {
+		ret[len(ret)-1] += "(" + argumentStr + ")"
+	}
+	if depStr != "" {
+		ret[len(ret)-1] += "[" + depStr + "]"
+	}
+
+	return strings.Join(ret, "."), nil
 }
 
 func (aap AssetAddressParsed) HasDependencies() bool {

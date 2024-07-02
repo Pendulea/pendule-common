@@ -22,3 +22,16 @@ func (st SetType) GetSupportedAssets() []AssetType {
 
 	return lo.Uniq(ret)
 }
+
+type SetTypeJSON struct {
+	Type          SetType           `json:"type"`
+	ArchiveChilds []ArchiveTypeJSON `json:"archive_childs"`
+}
+
+func (st SetType) JSON() SetTypeJSON {
+	archiveChilds := []ArchiveTypeJSON{}
+	for _, archive := range SET_ARCHIVES[st] {
+		archiveChilds = append(archiveChilds, archive.ToJSON())
+	}
+	return SetTypeJSON{st, archiveChilds}
+}

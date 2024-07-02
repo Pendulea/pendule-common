@@ -16,20 +16,27 @@ const BINANCE_FUTURES_TRADES ArchiveType = "binance_futures_trades"
 const BINANCE_BOOK_DEPTH ArchiveType = "binance_book_depth"
 const BINANCE_METRICS ArchiveType = "binance_metrics"
 
-func (at ArchiveType) GetArchiveZipPath(date string, set *SetJSON) string {
+var ARCHIVE_TYPE_LIST = []ArchiveType{
+	BINANCE_SPOT_TRADES,
+	BINANCE_FUTURES_TRADES,
+	BINANCE_BOOK_DEPTH,
+	BINANCE_METRICS,
+}
+
+func (at ArchiveType) GetArchiveZipPath(date string, set SetSettings) string {
 	archiveDir := filepath.Join(
 		Env.ARCHIVES_DIR,
-		strings.ToUpper(set.Settings.IDString()),
+		strings.ToUpper(set.IDString()),
 		"__archives",
 	)
 
 	return filepath.Join(archiveDir, string(at), fmt.Sprintf("%s.zip", date))
 }
 
-func (at ArchiveType) GetURL(date string, set *SetJSON) (string, error) {
+func (at ArchiveType) GetURL(date string, set SetSettings) (string, error) {
 
-	if err := set.Settings.IsBinancePair(); err == nil {
-		symbol := strings.ToUpper(set.Settings.IDString())
+	if err := set.IsBinancePair(); err == nil {
+		symbol := strings.ToUpper(set.IDString())
 		switch at {
 		case BINANCE_SPOT_TRADES:
 			fileName := fmt.Sprintf("%s-trades-%s.zip", symbol, date)
@@ -67,4 +74,16 @@ func (assetType AssetType) GetRequiredArchiveType() *ArchiveType {
 		}
 	}
 	return nil
+}
+
+func (at ArchiveType) ToJSON() ArchiveTypeJSON {
+	return ArchiveTypeJSON{
+		ArchiveType: at,
+		AssetChilds: at.GetTargetedAssets(),
+	}
+}
+
+type ArchiveTypeJSON struct {
+	ArchiveType ArchiveType `json:"archive_type"`
+	AssetChilds []AssetType `json:"asset_childs"`
 }

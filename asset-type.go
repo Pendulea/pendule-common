@@ -109,7 +109,9 @@ type AssetStateConfig struct {
 	RequiredArgumentTypes       []reflect.Type
 }
 
-var DEFAULT_ASSETS = map[AssetType]AssetStateConfig{
+type AvailableAssets map[AssetType]AssetStateConfig
+
+var DEFAULT_ASSETS = AvailableAssets{
 	//binance spot trades
 	Asset.SPOT_PRICE:  {Asset.SPOT_PRICE, UNIT, nil, nil},
 	Asset.SPOT_VOLUME: {Asset.SPOT_VOLUME, QUANTITY, nil, nil},
@@ -139,4 +141,29 @@ var DEFAULT_ASSETS = map[AssetType]AssetStateConfig{
 	Asset.FUTURES_VOLUME: {Asset.FUTURES_VOLUME, QUANTITY, nil, nil},
 
 	Asset.RSI: {Asset.RSI, POINT, []DataType{UNIT}, []reflect.Type{reflect.TypeOf(int64(0))}},
+}
+
+type AvailableAssetJSON struct {
+	AssetType AssetType `json:"asset_type"`
+	DataType  DataType  `json:"data_type"`
+
+	Dependencies  []DataType `json:"dependencies"`
+	ArgumentTypes []string   `json:"argument_types"`
+}
+
+func (aa AvailableAssets) JSON() []AvailableAssetJSON {
+	ret := []AvailableAssetJSON{}
+	for _, v := range aa {
+		argumentTypes := []string{}
+		for _, arg := range v.RequiredArgumentTypes {
+			argumentTypes = append(argumentTypes, arg.String())
+		}
+		ret = append(ret, AvailableAssetJSON{
+			AssetType:     v.ID,
+			DataType:      v.DataType,
+			Dependencies:  v.RequiredDependencyDataTypes,
+			ArgumentTypes: argumentTypes,
+		})
+	}
+	return ret
 }

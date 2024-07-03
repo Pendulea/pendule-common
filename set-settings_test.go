@@ -44,7 +44,6 @@ func TestSetJSON(t *testing.T) {
 			Dependencies: []AssetAddress{set.Assets[0].Address.AddSetID(set.ID).BuildAddress()},
 			Arguments:    []string{"14"},
 		},
-		Decimals: 3,
 	})
 	assert.Equal(t, set.IsValid(), nil, "Set should be valid")
 	assert.Equal(t, set.IsBinancePair(), nil, "Set should be a binance pair")
@@ -54,7 +53,6 @@ func TestSetJSON(t *testing.T) {
 			Dependencies: []AssetAddress{set.Assets[0].Address.AddSetID(set.ID).BuildAddress()},
 			Arguments:    []string{"14", "14"},
 		},
-		Decimals: 3,
 	})
 	assert.NotEqual(t, set.IsValid(), nil, "Set should be invalid")
 

@@ -11,7 +11,6 @@ type AssetAddressParsedWithoutSetID struct {
 type AssetSettings struct {
 	Address     AssetAddressParsedWithoutSetID `json:"address"`
 	MinDataDate string                         `json:"min_data_date"`
-	Decimals    int8                           `json:"decimals"`
 }
 
 func (adp AssetAddressParsedWithoutSetID) AddSetID(setID []string) AssetAddressParsed {
@@ -42,10 +41,6 @@ func (as AssetSettings) IsValid(setSettings SetSettings) error {
 		}
 	} else if as.MinDataDate != "" {
 		return fmt.Errorf("min_data_date should be empty when dependencies are present")
-	}
-
-	if as.Decimals < 0 || as.Decimals > 12 {
-		return fmt.Errorf("decimals out of range: %d", as.Decimals)
 	}
 
 	return nil

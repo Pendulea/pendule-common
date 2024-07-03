@@ -42,7 +42,6 @@ func (s *SetSettings) HasSettingValue(id string) int64 {
 }
 
 func (s *SetSettings) IsValid() error {
-
 	// Check for empty ID and invalid characters
 	for _, id := range s.ID {
 		id = strings.TrimSpace(id)
@@ -107,9 +106,6 @@ func (s *SetSettings) IsBinancePair() error {
 			if !assetAddress.HasArguments() && !assetAddress.HasDependencies() {
 				if lo.IndexOf(supportedAsset, assetAddress.AssetType) == -1 {
 					return fmt.Errorf("unsupported asset")
-				}
-				if asset.Decimals > 12 {
-					return fmt.Errorf("decimals out of range")
 				}
 			}
 		}

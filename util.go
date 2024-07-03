@@ -116,3 +116,38 @@ func isAlphanumeric(s string) bool {
 	}
 	return true
 }
+
+func countDivisionsTo(priceUSD float64, to float64) int8 {
+	decimals := 0
+	for priceUSD >= to {
+		priceUSD /= 10
+		decimals++
+	}
+	return int8(decimals)
+}
+
+func priceDecimals(priceUSD float64) int8 {
+	if priceUSD >= 100 {
+		return 2
+	} else if priceUSD >= 10 {
+		return 3
+	} else if priceUSD >= 1 {
+		return 4
+	} else if priceUSD >= 0.1 {
+		return 5
+	} else if priceUSD >= 0.01 {
+		return 6
+	} else if priceUSD >= 0.001 {
+		return 7
+	} else if priceUSD >= 0.0001 {
+		return 8
+	} else if priceUSD >= 0.00001 {
+		return 9
+	} else if priceUSD >= 0.000001 {
+		return 10
+	} else if priceUSD >= 0.0000001 {
+		return 11
+	} else {
+		return 12
+	}
+}

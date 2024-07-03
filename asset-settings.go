@@ -30,6 +30,11 @@ func (as AssetSettings) IsValid(setSettings SetSettings) error {
 		return err
 	}
 
+	config := DEFAULT_ASSETS[as.Address.AssetType]
+	if config.DefaultDecimals < 0 && config.SetUpDecimals == nil {
+		return fmt.Errorf("config decimals not set for asset type %s", as.Address.AssetType)
+	}
+
 	if !assetAddress.HasDependencies() {
 		_, err := Format.StrDateToDate(as.MinDataDate)
 		if err != nil {

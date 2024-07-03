@@ -108,7 +108,7 @@ func (s *SetSettings) IsBinancePair() error {
 				if lo.IndexOf(supportedAsset, assetAddress.AssetType) == -1 {
 					return fmt.Errorf("unsupported asset")
 				}
-				if asset.Decimals > 6 {
+				if asset.Decimals > 12 {
 					return fmt.Errorf("decimals out of range")
 				}
 			}

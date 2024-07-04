@@ -151,6 +151,22 @@ func (aap AssetAddressParsed) HasArguments() bool {
 	return len(aap.Arguments) > 0
 }
 
+func (aap AssetAddressParsed) PrettyString() string {
+	args := strings.Join(aap.Arguments, "-")
+	depsType := []string{}
+	for _, dep := range aap.Dependencies {
+		p, _ := dep.Parse()
+		depsType = append(depsType, p.PrettyString())
+	}
+	depsStr := strings.Join(depsType, ", ")
+	if depsStr != "" {
+		depsStr = "(" + depsStr + ")"
+	}
+
+	//ex: "BTCUSDT.RSI-14(BTCUSDT.SPOT_PRICE)"
+	return strings.ToUpper(strings.Join(aap.SetID, "")+"."+string(aap.AssetType)+args) + depsStr
+}
+
 func (address AssetAddress) Parse() (*AssetAddressParsed, error) {
 	// Step 1: Find the main parts
 	parts, err := splitMainParts(string(address))

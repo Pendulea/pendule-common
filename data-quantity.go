@@ -36,6 +36,14 @@ type QuantityTime struct {
 
 type QuantityTimeArray []QuantityTime
 
+func (lst QuantityTimeArray) Reverse() DataList {
+	ret := make(QuantityTimeArray, len(lst))
+	for i, v := range lst {
+		ret[len(lst)-1-i] = v
+	}
+	return ret
+}
+
 func (a QuantityTimeArray) ToRaw(decimal int8) map[TimeUnit][]byte {
 	ret := make(map[TimeUnit][]byte)
 	for _, v := range a {

@@ -32,6 +32,7 @@ type DataList interface {
 	Append(pt Data) DataList
 	Prepend(pt Data) DataList
 	Len() int
+	Reverse() DataList
 	RemoveFirstN(n int) DataList
 	Map() []Data
 	ToJSON(columns []ColumnName) ([]map[ColumnName]interface{}, error)

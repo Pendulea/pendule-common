@@ -29,6 +29,14 @@ type UnitTime struct {
 
 type UnitTimeArray []UnitTime
 
+func (lst UnitTimeArray) Reverse() DataList {
+	ret := make(UnitTimeArray, len(lst))
+	for i, v := range lst {
+		ret[len(lst)-1-i] = v
+	}
+	return ret
+}
+
 func (a UnitTimeArray) ToRaw(decimal int8) map[TimeUnit][]byte {
 	ret := make(map[TimeUnit][]byte)
 	for _, v := range a {

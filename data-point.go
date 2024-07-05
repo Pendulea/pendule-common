@@ -20,6 +20,14 @@ type PointTime struct {
 
 type PointTimeArray []PointTime
 
+func (lst PointTimeArray) Reverse() DataList {
+	ret := make(PointTimeArray, len(lst))
+	for i, v := range lst {
+		ret[len(lst)-1-i] = v
+	}
+	return ret
+}
+
 func (lst PointTimeArray) Aggregate(timeframe time.Duration, newTime TimeUnit) Data {
 	log.Fatal("no aggregation for points data")
 	return PointTime{}

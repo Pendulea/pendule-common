@@ -44,6 +44,7 @@ func TestSetJSON(t *testing.T) {
 			Dependencies: []AssetAddress{set.Assets[0].Address.AddSetID(set.ID).BuildAddress()},
 			Arguments:    []string{"14"},
 		},
+		MinDataDate: "2020-05-05",
 	})
 	assert.Equal(t, set.IsValid(), nil, "Set should be valid")
 	assert.Equal(t, set.IsBinancePair(), nil, "Set should be a binance pair")

@@ -73,6 +73,13 @@ func (lst PointTimeArray) First() Data {
 	return &lst[0]
 }
 
+func (lst PointTimeArray) Last() Data {
+	if len(lst) == 0 {
+		return nil
+	}
+	return &lst[len(lst)-1]
+}
+
 func (lst PointTimeArray) Len() int {
 	if lst == nil {
 		return 0

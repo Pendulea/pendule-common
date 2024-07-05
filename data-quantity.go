@@ -89,6 +89,13 @@ func (lst QuantityTimeArray) First() Data {
 	return &lst[0]
 }
 
+func (lst QuantityTimeArray) Last() Data {
+	if len(lst) == 0 {
+		return nil
+	}
+	return &lst[len(lst)-1]
+}
+
 func (lst QuantityTimeArray) Len() int {
 	if lst == nil {
 		return 0

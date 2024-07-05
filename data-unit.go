@@ -125,6 +125,13 @@ func (lst UnitTimeArray) Map() []Data {
 	return ret
 }
 
+func (lst UnitTimeArray) Last() Data {
+	if len(lst) == 0 {
+		return nil
+	}
+	return &lst[len(lst)-1]
+}
+
 func (lst UnitTimeArray) RemoveFirstN(n int) DataList {
 	if n >= len(lst) {
 		return PointTimeArray{}

@@ -28,6 +28,7 @@ type Data interface {
 type DataList interface {
 	Aggregate(timeframe time.Duration, newTime TimeUnit) Data
 	First() Data
+	Last() Data
 	ToRaw(decimals int8) map[TimeUnit][]byte
 	Append(pt Data) DataList
 	Prepend(pt Data) DataList

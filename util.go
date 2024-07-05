@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"unicode"
 )
 
@@ -150,4 +151,8 @@ func priceDecimals(priceUSD float64) int8 {
 	} else {
 		return 12
 	}
+}
+
+func SetIDToString(id []string) string {
+	return strings.ToLower(strings.Join(id, ""))
 }

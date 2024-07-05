@@ -95,11 +95,44 @@ func (adp AssetAddressParsed) BuildAddress() AssetAddress {
 	return AssetAddress(assetAddress)
 }
 
+type AssetAddressParsedJSON struct {
+	SetID        []string                 `json:"set_id"`
+	AssetType    AssetType                `json:"asset_type"`
+	Dependencies []AssetAddressParsedJSON `json:"dependencies"`
+	Arguments    []string                 `json:"arguments"`
+}
+
 type AssetAddressParsed struct {
 	SetID        []string       `json:"set_id"`
 	AssetType    AssetType      `json:"asset_type"`
 	Dependencies []AssetAddress `json:"dependencies"`
 	Arguments    []string       `json:"arguments"`
+}
+
+func (aap AssetAddressParsed) JSON() (AssetAddressParsedJSON, error) {
+	dependencies := []AssetAddressParsedJSON{}
+	for _, depAddr := range aap.Dependencies {
+		p, err := depAddr.Parse()
+		if err != nil {
+			return AssetAddressParsedJSON{}, err
+		}
+		json, err := p.JSON()
+		if err != nil {
+			return AssetAddressParsedJSON{}, err
+		}
+		dependencies = append(dependencies, json)
+	}
+
+	return AssetAddressParsedJSON{
+		SetID:        aap.SetID,
+		AssetType:    aap.AssetType,
+		Dependencies: dependencies,
+		Arguments:    aap.Arguments,
+	}, nil
+}
+
+func (aap AssetAddressParsed) IDString() string {
+	return SetIDToString(aap.SetID)
 }
 
 func (aap AssetAddressParsed) BuildCSVColumnName(includeSetID bool) (string, error) {
@@ -130,7 +163,7 @@ func (aap AssetAddressParsed) BuildCSVColumnName(includeSetID bool) (string, err
 
 	ret := []string{}
 	if includeSetID {
-		ret = append(ret, strings.ToLower(strings.Join(aap.SetID, "")))
+		ret = append(ret, SetIDToString(aap.SetID))
 	}
 	ret = append(ret, string(aap.AssetType))
 	if argumentStr != "" {

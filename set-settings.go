@@ -15,7 +15,7 @@ type SetSettings struct {
 }
 
 func (s SetSettings) IDString() string {
-	return strings.ToLower(strings.Join(s.ID, ""))
+	return SetIDToString(s.ID)
 }
 
 func (s SetSettings) DBPath() string {

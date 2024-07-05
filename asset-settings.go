@@ -34,14 +34,9 @@ func (as AssetSettings) IsValid(setSettings SetSettings) error {
 		return fmt.Errorf("config decimals not set for asset type %s", as.Address.AssetType)
 	}
 
-	if !assetAddress.HasDependencies() {
-		_, err := Format.StrDateToDate(as.MinDataDate)
-		if err != nil {
-			return err
-		}
-	} else if as.MinDataDate != "" {
-		return fmt.Errorf("min_data_date should be empty when dependencies are present")
+	_, err := Format.StrDateToDate(as.MinDataDate)
+	if err != nil {
+		return err
 	}
-
 	return nil
 }

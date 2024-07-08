@@ -144,7 +144,7 @@ func (q DataType) Header(prefix string, requirement CSVCheckListRequirement) []s
 			if column == ColumnType.VALUE {
 				list = append(list, prefix)
 			} else {
-				list = append(list, prefix+"_"+string(column))
+				list = append(list, prefix+"."+string(column))
 			}
 		}
 	}

@@ -26,6 +26,38 @@ func (f format) ExtractDateFromTradeZipFile(filename string) (string, error) {
 	return "", errors.New("no match found")
 }
 
+func LabelToTimeFrame(label string) (time.Duration, error) {
+	regex := regexp.MustCompile(`^(\d+)([wdhms]?)$`)
+	match := regex.FindStringSubmatch(label)
+	if len(match) != 3 {
+		return 0, errors.New("invalid label format")
+	}
+
+	value, err := strconv.Atoi(match[1])
+	if err != nil {
+		return 0, errors.New("invalid value in label")
+	}
+
+	unit := match[2]
+
+	switch unit {
+	case "w":
+		return time.Duration(value) * WEEK, nil
+	case "d":
+		return time.Duration(value) * DAY, nil
+	case "h":
+		return time.Duration(value) * time.Hour, nil
+	case "m":
+		return time.Duration(value) * time.Minute, nil
+	case "s":
+		return time.Duration(value) * time.Second, nil
+	case "ms":
+		return time.Duration(value) * time.Millisecond, nil
+	default:
+		return 0, errors.New("invalid label format")
+	}
+}
+
 func (f format) TimeFrameToLabel(timeFrame time.Duration) (string, error) {
 	if timeFrame > MAX_TIME_FRAME {
 		return "", errors.New("time frame is too large")

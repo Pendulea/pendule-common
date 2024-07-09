@@ -5,6 +5,8 @@ import "time"
 type Consistency struct {
 	Range     [2]TimeUnit `json:"range"`
 	Timeframe int64       `json:"timeframe"`
+	MinValue  float64     `json:"min_value"`
+	MaxValue  float64     `json:"max_value"`
 }
 
 type AssetJSON struct {

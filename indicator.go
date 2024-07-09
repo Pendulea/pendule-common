@@ -3,6 +3,7 @@ package pcommon
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"reflect"
 	"strconv"
 	"strings"
@@ -12,16 +13,18 @@ type IndicatorDataBuilder struct {
 	assetType AssetType
 	prevState []byte
 	arguments []string
+	Precision int8
 
 	cachedParsedState interface{}
 	cachedArguments   []interface{}
 }
 
-func NewIndicatorDataBuilder(assetType AssetType, prevState []byte, arguments []string) *IndicatorDataBuilder {
+func NewIndicatorDataBuilder(assetType AssetType, prevState []byte, arguments []string, precision int8) *IndicatorDataBuilder {
 	b := &IndicatorDataBuilder{
 		assetType: assetType,
 		prevState: prevState,
 		arguments: arguments,
+		Precision: precision,
 
 		cachedParsedState: nil,
 		cachedArguments:   nil,
@@ -73,14 +76,13 @@ func parseIndicatorState[T any](b *IndicatorDataBuilder) (*T, error) {
 	return b.cachedParsedState.(*T), nil
 }
 
-func (b *IndicatorDataBuilder) saveState(state interface{}) error {
+func (b *IndicatorDataBuilder) saveState(state interface{}) {
 	data, err := json.Marshal(state)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 	b.prevState = data
 	b.cachedParsedState = state
-	return nil
 }
 
 func (b *IndicatorDataBuilder) PrevState() []byte {
@@ -94,16 +96,26 @@ func (b *IndicatorDataBuilder) PrevState() []byte {
 
 func (b *IndicatorDataBuilder) ComputeUnsafe(dataList ...Data) (*Point, error) {
 
+	var p *Point = nil
+
 	if b.assetType == Asset.RSI {
 		state, err := parseIndicatorState[rsiState](b)
 		if err != nil {
 			return nil, err
 		}
-		p := state.buildRSI(dataList[0].(UnitTime), b.cachedArguments[0].(int64))
-		return &p, b.saveState(state)
+		defer b.saveState(state)
+		p = state.buildRSI(dataList[0].(UnitTime), b.cachedArguments[0].(int64))
 	}
 
-	return nil, errors.New("not implemented")
+	if p == nil {
+		return nil, errors.New("not implemented")
+	}
+
+	if b.Precision >= 0 {
+		p.Value = Math.RoundFloat(p.Value, uint(b.Precision))
+	}
+
+	return p, nil
 }
 
 /* RELATIVE STRENGTH INDEX : RSI */
@@ -115,13 +127,13 @@ type rsiState struct {
 	Pos       int64   `json:"pos"`
 }
 
-func (state *rsiState) buildRSI(newTick UnitTime, RSI_PERIOD int64) Point {
+func (state *rsiState) buildRSI(newTick UnitTime, RSI_PERIOD int64) *Point {
 	defer func() {
 		state.LastClose = newTick.Close
 	}()
 
 	if state.LastClose <= 0 {
-		return Point{Value: -1}
+		return &Point{Value: -1}
 	}
 
 	change := newTick.Close - state.LastClose
@@ -142,7 +154,7 @@ func (state *rsiState) buildRSI(newTick UnitTime, RSI_PERIOD int64) Point {
 		state.AvgGain += gain
 		state.AvgLoss += loss
 		if state.Pos < RSI_PERIOD {
-			return Point{-1} // Not enough data to compute RSI yet
+			return &Point{-1} // Not enough data to compute RSI yet
 		}
 	}
 
@@ -162,5 +174,5 @@ func (state *rsiState) buildRSI(newTick UnitTime, RSI_PERIOD int64) Point {
 		state.LastRSI = float64(100 - (100 / (1 + rs)))
 	}
 
-	return Point{state.LastRSI}
+	return &Point{state.LastRSI}
 }

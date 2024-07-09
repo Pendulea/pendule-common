@@ -41,7 +41,7 @@ func TestIndicatorBuilder(t *testing.T) {
 	const PERIOD_STRING = "14"
 	const PERIOD_INT = 14
 
-	b := NewIndicatorDataBuilder(Asset.RSI, nil, []string{PERIOD_STRING})
+	b := NewIndicatorDataBuilder(Asset.RSI, nil, []string{PERIOD_STRING}, -1)
 	assert.Equal(t, []byte(nil), b.PrevState(), "PrevState should be nil")
 	p, err := b.ComputeUnsafe(units[0])
 	assert.Equal(t, nil, err, "Error should be nil")

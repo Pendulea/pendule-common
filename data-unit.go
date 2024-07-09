@@ -261,6 +261,14 @@ func (p UnitTime) GetTime() TimeUnit {
 	return p.Time
 }
 
+func (p UnitTime) Min() float64 {
+	return p.Low
+}
+
+func (p UnitTime) Max() float64 {
+	return p.High
+}
+
 func (q UnitTime) CSVLine(decimals int8, requirement CSVCheckListRequirement) []string {
 	ret := []string{}
 

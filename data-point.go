@@ -134,6 +134,14 @@ func (p PointTime) GetTime() TimeUnit {
 	return p.Time
 }
 
+func (p PointTime) Min() float64 {
+	return p.Value
+}
+
+func (p PointTime) Max() float64 {
+	return p.Value
+}
+
 func (m PointTime) CSVLine(volumeDecimals int8, requirement CSVCheckListRequirement) []string {
 	ret := []string{}
 

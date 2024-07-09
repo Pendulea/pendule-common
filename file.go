@@ -4,14 +4,11 @@ import (
 	"archive/zip"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"time"
-
-	"github.com/fsnotify/fsnotify"
 )
 
 type file struct{}
@@ -66,107 +63,6 @@ func (f file) RemoveFile(filePath string) error {
 }
 
 type FileCallback func(fileName string)
-
-// Initializes the watcher and provides an initial list of zip files.
-func (f file) InitFolderWatcher(folderPath string, callback FileCallback, watcher *fsnotify.Watcher) error {
-	// First, list all existing zip files in the folder.
-
-	callbackDownloadedFile := func(filePath string) bool {
-		retry := 10
-		if hasFileBeenModified(filePath, time.Minute) {
-			return true
-		}
-
-		for i := 0; i < retry; i++ {
-			if hasFileBeenModified(filePath, time.Minute) {
-				return true
-			}
-			time.Sleep(1 * time.Minute)
-		}
-		return false
-	}
-
-	// Start a goroutine to handle the events.
-	go func() {
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				if event.Op&fsnotify.Create == fsnotify.Create {
-					if filepath.Ext(event.Name) == ".zip" {
-						go func(fullPath string) {
-							if callbackDownloadedFile(fullPath) {
-								callback(fullPath)
-							}
-						}(event.Name)
-					}
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				log.Println("error:", err)
-			}
-		}
-	}()
-
-	// Add the directory to the watcher.
-	err := watcher.Add(folderPath)
-	if err != nil {
-		return err
-	}
-
-	// Block forever (or until the watcher is stopped another way)
-	select {}
-}
-
-func hasFileBeenModified(filePath string, duration time.Duration) bool {
-	info, err := os.Stat(filePath)
-	if err != nil {
-		return false
-	}
-	return time.Since(info.ModTime()) >= duration
-}
-
-func (f file) ListenPairJSONFileChange(pairsPath string, callback func(path string)) {
-	// Create a new watcher
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer watcher.Close()
-
-	// Start a goroutine to handle events
-	go func() {
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					callback(pairsPath)
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				log.Println("error:", err)
-			}
-		}
-	}()
-
-	// Add the directory to the watcher
-	err = watcher.Add(pairsPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Block forever
-	select {}
-}
 
 func (f file) GetFolderSize(folderPath string) (int64, error) {
 	var totalSize int64

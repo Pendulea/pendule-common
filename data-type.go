@@ -23,6 +23,8 @@ type Data interface {
 	IsEmpty() bool
 	Type() DataType
 	GetTime() TimeUnit
+	Max() float64
+	Min() float64
 }
 
 type DataList interface {

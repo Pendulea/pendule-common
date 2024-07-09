@@ -26,7 +26,7 @@ func (f format) ExtractDateFromTradeZipFile(filename string) (string, error) {
 	return "", errors.New("no match found")
 }
 
-func LabelToTimeFrame(label string) (time.Duration, error) {
+func (f format) LabelToTimeFrame(label string) (time.Duration, error) {
 	regex := regexp.MustCompile(`^(\d+)([wdhms]?)$`)
 	match := regex.FindStringSubmatch(label)
 	if len(match) != 3 {
@@ -170,18 +170,6 @@ func (f format) AccurateHumanize(d time.Duration) string {
 	}
 	weeks := int(d.Hours() / 24 / 7)
 	return fmt.Sprintf("%dw", weeks)
-}
-
-// func (f format) BuildSetID(symbol string, tradeType TradeType) string {
-// 	return symbol + tradeType.Key()
-// }
-
-func (f format) CuteHash(s string) string {
-	var h int
-	for i, c := range s {
-		h += i + int(c)
-	}
-	return fmt.Sprintf("%010d", h)
 }
 
 func (f format) ArrayDurationToArrInt64(durations []time.Duration) []int64 {

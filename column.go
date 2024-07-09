@@ -7,6 +7,7 @@ import (
 )
 
 type ColumnName string
+type ColumnNames []ColumnName
 
 var ColumnType = struct {
 	TIME ColumnName
@@ -69,4 +70,12 @@ func (c CSVCheckListRequirement) Columns() []ColumnName {
 		return result[i] < result[j]
 	})
 	return result
+}
+
+func (columns ColumnNames) ToString() []string {
+	names := make([]string, len(columns))
+	for i, col := range columns {
+		names[i] = string(col)
+	}
+	return names
 }

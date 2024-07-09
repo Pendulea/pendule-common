@@ -220,6 +220,14 @@ func (q Quantity) ToTime(time TimeUnit) QuantityTime {
 	}
 }
 
+func (p QuantityTime) Min() float64 {
+	return -p.Minus
+}
+
+func (p QuantityTime) Max() float64 {
+	return p.Plus
+}
+
 func (p QuantityTime) GetTime() TimeUnit {
 	return p.Time
 }

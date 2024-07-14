@@ -295,7 +295,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.RSI, POINT, []DataType{UNIT}, []reflect.Type{reflect.TypeOf(int64(0))},
 		"Relative Strength Index (RSI)", "A momentum oscillator that measures the speed and change of price movements, indicating overbought or oversold conditions.",
-		"##614C97",
+		"#614C97",
 	},
 }
 

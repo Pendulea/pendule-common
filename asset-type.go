@@ -111,6 +111,7 @@ type AssetStateConfig struct {
 	RequiredArgumentTypes       []reflect.Type
 	Label                       string
 	Description                 string
+	Color                       string
 }
 
 type AvailableAssets map[AssetType]AssetStateConfig
@@ -123,6 +124,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.SPOT_PRICE, UNIT, nil, nil,
 		"Spot Price", "The current price at which an asset is bought or sold in the spot market on Binance.",
+		"#5F9EA0",
 	},
 	Asset.SPOT_VOLUME: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -130,6 +132,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.SPOT_VOLUME, QUANTITY, nil, nil,
 		"Spot Volume", "The total amount of an asset traded in the spot market on Binance.",
+		"#228B22",
 	},
 
 	// Binance order book depth
@@ -139,6 +142,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_P1, UNIT, nil, nil,
 		"Liquidity +1% Price", "Available liquidity at a price level 1% above the current market price on Binance.",
+		"#044f56",
 	},
 	Asset.BOOK_DEPTH_P2: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -146,6 +150,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_P2, UNIT, nil, nil,
 		"Liquidity +2% Price", "Available liquidity at a price level 2% above the current market price on Binance.",
+		"#07636c",
 	},
 	Asset.BOOK_DEPTH_P3: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -153,6 +158,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_P3, UNIT, nil, nil,
 		"Liquidity +3% Price", "Available liquidity at a price level 3% above the current market price on Binance.",
+		"#0a7882",
 	},
 	Asset.BOOK_DEPTH_P4: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -160,6 +166,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_P4, UNIT, nil, nil,
 		"Liquidity +4% Price", "Available liquidity at a price level 4% above the current market price on Binance.",
+		"#0e8d99",
 	},
 	Asset.BOOK_DEPTH_P5: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -167,6 +174,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_P5, UNIT, nil, nil,
 		"Liquidity +5% Price", "Available liquidity at a price level 5% above the current market price on Binance.",
+		"#12a3b0",
 	},
 	Asset.BOOK_DEPTH_M1: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -174,6 +182,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_M1, UNIT, nil, nil,
 		"Liquidity -1% Price", "Available liquidity at a price level 1% below the current market price on Binance.",
+		"#0b186b",
 	},
 	Asset.BOOK_DEPTH_M2: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -181,6 +190,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_M2, UNIT, nil, nil,
 		"Liquidity -2% Price", "Available liquidity at a price level 2% below the current market price on Binance.",
+		"#0b186b",
 	},
 	Asset.BOOK_DEPTH_M3: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -188,6 +198,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_M3, UNIT, nil, nil,
 		"Liquidity -3% Price", "Available liquidity at a price level 3% below the current market price on Binance.",
+		"#08135c",
 	},
 	Asset.BOOK_DEPTH_M4: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -195,6 +206,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_M4, UNIT, nil, nil,
 		"Liquidity -4% Price", "Available liquidity at a price level 4% below the current market price on Binance.",
+		"#060f4e",
 	},
 	Asset.BOOK_DEPTH_M5: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -202,6 +214,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.BOOK_DEPTH_M5, UNIT, nil, nil,
 		"Liquidity -5% Price", "Available liquidity at a price level 5% below the current market price on Binance.",
+		"#040a3f",
 	},
 
 	// Metrics
@@ -211,6 +224,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.METRIC_SUM_OPEN_INTEREST, UNIT, nil, nil,
 		"Open Interest", "The total number of outstanding derivative contracts, such as options or futures, that have not been settled on Binance.",
+		"#f1ae8a",
 	},
 
 	Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO: {
@@ -219,6 +233,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil,
 		"Taker Long/Short Ratio", "The ratio of long to short positions taken by top traders on Binance.",
+		"#5e4e29",
 	},
 	Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -226,6 +241,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil,
 		"Top Trader Long/Short Ratio", "The ratio of the sum of long to short positions taken by top traders on Binance.",
+		"#6d5e3d",
 	},
 	Asset.METRIC_COUNT_LONG_SHORT_RATIO: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -233,6 +249,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.METRIC_COUNT_LONG_SHORT_RATIO, UNIT, nil, nil,
 		"Long/Short Ratio", "The overall ratio of long to short positions taken by all traders on Binance.",
+		"#b09763",
 	},
 	Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -240,6 +257,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO, UNIT, nil, nil,
 		"Taker Long/Short Volume Ratio", "The ratio of long to short volumes taken by top traders on Binance.",
+		"#b8a173",
 	},
 
 	// Supply
@@ -249,6 +267,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.CIRCULATING_SUPPLY, UNIT, nil, nil,
 		"Circulating Supply", "The total number of tokens that are currently available in circulation.",
+		"#eaeaea",
 	},
 
 	// Binance futures
@@ -258,6 +277,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.FUTURES_PRICE, UNIT, nil, nil,
 		"Futures Price", "The current price at which a futures contract is trading on Binance.",
+		"#386061",
 	},
 	Asset.FUTURES_VOLUME: {
 		func(priceUSDA, priceUSDB float64) int8 {
@@ -265,6 +285,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.FUTURES_VOLUME, QUANTITY, nil, nil,
 		"Futures Volume", "The total amount of futures contracts traded on Binance.",
+		"#0b430b",
 	},
 
 	// Technical Indicators
@@ -274,6 +295,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		},
 		Asset.RSI, POINT, []DataType{UNIT}, []reflect.Type{reflect.TypeOf(int64(0))},
 		"Relative Strength Index (RSI)", "A momentum oscillator that measures the speed and change of price movements, indicating overbought or oversold conditions.",
+		"##614C97",
 	},
 }
 
@@ -282,10 +304,12 @@ type AvailableAssetJSON struct {
 	DataType        DataType  `json:"data_type"`
 	DefaultDecimals int8      `json:"default_decimals"`
 
-	Dependencies        []DataType   `json:"dependencies"`
-	ArgumentTypes       []string     `json:"argument_types"`
-	Label               string       `json:"label"`
-	Description         string       `json:"description"`
+	Dependencies  []DataType `json:"dependencies"`
+	ArgumentTypes []string   `json:"argument_types"`
+	Label         string     `json:"label"`
+	Description   string     `json:"description"`
+	Color         string     `json:"color"`
+
 	DataTypeName        string       `json:"data_type_name"`
 	DataTypeColor       string       `json:"data_type_color"`
 	DataTypeColumns     []ColumnName `json:"data_type_columns"`
@@ -310,6 +334,7 @@ func (aa AvailableAssets) JSON() []AvailableAssetJSON {
 			ArgumentTypes:       argumentTypes,
 			Label:               v.Label,
 			Description:         v.Description,
+			Color:               v.Color,
 		})
 	}
 	return ret

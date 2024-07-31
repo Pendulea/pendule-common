@@ -35,7 +35,14 @@ type AllAssetTypes struct {
 	METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO    AssetType
 
 	CIRCULATING_SUPPLY AssetType
-	RSI                AssetType
+
+	RSI AssetType
+
+	RSI2 AssetType
+	SMA  AssetType
+	EMA  AssetType
+	WMA  AssetType
+	HMA  AssetType
 }
 
 var Asset = AllAssetTypes{
@@ -65,6 +72,12 @@ var Asset = AllAssetTypes{
 
 	CIRCULATING_SUPPLY: "circulating_supply",
 	RSI:                "rsi",
+
+	RSI2: "rsi2",
+	SMA:  "sma",
+	EMA:  "ema",
+	WMA:  "wma",
+	HMA:  "hma",
 }
 
 var AssetTypeMap = Asset.ToMap()
@@ -297,6 +310,15 @@ var DEFAULT_ASSETS = AvailableAssets{
 		"Relative Strength Index (RSI)", "A momentum oscillator that measures the speed and change of price movements, indicating overbought or oversold conditions.",
 		"#614C97",
 	},
+
+	Asset.RSI2: {
+		func(priceUSDA, priceUSDB float64) int8 {
+			return 2
+		},
+		Asset.RSI2, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		"Relative Strength Index 2 (RSI)", "A momentum oscillator that measures the speed and change of price movements, indicating overbought or oversold conditions.",
+		"#614C97",
+	},
 }
 
 type AvailableAssetJSON struct {
@@ -323,13 +345,16 @@ func (aa AvailableAssets) JSON() []AvailableAssetJSON {
 		for _, arg := range v.RequiredArgumentTypes {
 			argumentTypes = append(argumentTypes, arg.String())
 		}
+
+		dataType := v.DataType
+
 		ret = append(ret, AvailableAssetJSON{
 			AssetType:           v.ID,
 			DataType:            v.DataType,
-			DataTypeName:        v.DataType.String(),
-			DataTypeColor:       v.DataType.Color(),
-			DataTypeColumns:     v.DataType.Columns(),
-			DataTypeDescription: v.DataType.Description(),
+			DataTypeName:        When[string](dataType == -1).Then("").Else(dataType.String()),
+			DataTypeColor:       When[string](dataType == -1).Then("").Else(dataType.Color()),
+			DataTypeColumns:     When[[]ColumnName](dataType == -1).Then([]ColumnName{}).Else(dataType.Columns()),
+			DataTypeDescription: When[string](dataType == -1).Then("").Else(dataType.Description()),
 			Dependencies:        v.RequiredDependencyDataTypes,
 			ArgumentTypes:       argumentTypes,
 			Label:               v.Label,

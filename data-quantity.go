@@ -154,6 +154,28 @@ func (list QuantityTimeArray) Aggregate(timeframe time.Duration, newTime TimeUni
 	return ret
 }
 
+func (p QuantityTime) ValueAt(column ColumnName) (float64, error) {
+	switch column {
+	case ColumnType.PLUS:
+		return p.Plus, nil
+	case ColumnType.MINUS:
+		return p.Minus, nil
+	case ColumnType.PLUS_AVERAGE:
+		return p.PlusAvg, nil
+	case ColumnType.MINUS_AVERAGE:
+		return p.MinusAvg, nil
+	case ColumnType.PLUS_MEDIAN:
+		return p.PlusMed, nil
+	case ColumnType.MINUS_MEDIAN:
+		return p.MinusMed, nil
+	case ColumnType.PLUS_COUNT:
+		return float64(p.PlusCount), nil
+	case ColumnType.MINUS_COUNT:
+		return float64(p.MinusCount), nil
+	}
+	return 0.00, fmt.Errorf("column %s not found", column)
+}
+
 func (m Quantity) IsEmpty() bool {
 	return m.MinusCount == 0 && m.PlusCount == 0
 }

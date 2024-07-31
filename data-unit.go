@@ -269,6 +269,28 @@ func (p UnitTime) Max() float64 {
 	return p.High
 }
 
+func (p UnitTime) ValueAt(column ColumnName) (float64, error) {
+	switch column {
+	case ColumnType.OPEN:
+		return p.Open, nil
+	case ColumnType.HIGH:
+		return p.High, nil
+	case ColumnType.LOW:
+		return p.Low, nil
+	case ColumnType.CLOSE:
+		return p.Close, nil
+	case ColumnType.AVERAGE:
+		return p.Average, nil
+	case ColumnType.MEDIAN:
+		return p.Median, nil
+	case ColumnType.ABSOLUTE_SUM:
+		return p.AbsoluteSum, nil
+	case ColumnType.COUNT:
+		return float64(p.Count), nil
+	}
+	return 0.00, fmt.Errorf("column %s not found", column)
+}
+
 func (q UnitTime) CSVLine(decimals int8, requirement CSVCheckListRequirement) []string {
 	ret := []string{}
 

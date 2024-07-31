@@ -13,6 +13,7 @@ type AssetAddress string
 
 func (adp AssetAddressParsed) IsValid() error {
 
+	//check setID
 	for _, id := range adp.SetID {
 		id = strings.TrimSpace(id)
 		if !isAlphanumeric(id) || id == "" {
@@ -20,10 +21,12 @@ func (adp AssetAddressParsed) IsValid() error {
 		}
 	}
 
+	//check asset type exists
 	if _, ok := AssetTypeMap[string(adp.AssetType)]; !ok {
 		return fmt.Errorf("asset type is invalid")
 	}
 
+	//check asset from archives
 	for at := range ArchivesIndex {
 		for _, assetType := range at.GetTargetedAssets() {
 			if adp.AssetType == assetType {
@@ -35,9 +38,13 @@ func (adp AssetAddressParsed) IsValid() error {
 	}
 
 	config := DEFAULT_ASSETS[adp.AssetType]
-	if len(adp.Dependencies) != len(config.RequiredDependencyDataTypes) {
-		return fmt.Errorf("dependencies length mismatch")
+	if len(config.RequiredArgumentTypes) != len(adp.Arguments) {
+		return fmt.Errorf("invalid number of arguments")
 	}
+	if len(config.RequiredDependencyDataTypes) != len(adp.Dependencies) {
+		return fmt.Errorf("invalid number of dependencies")
+	}
+
 	for i, depAddr := range adp.Dependencies {
 		dep, err := depAddr.Parse()
 		if err != nil {
@@ -46,14 +53,13 @@ func (adp AssetAddressParsed) IsValid() error {
 		if err := dep.IsValid(); err != nil {
 			return err
 		}
-		if DEFAULT_ASSETS[dep.AssetType].DataType != config.RequiredDependencyDataTypes[i] {
-			return fmt.Errorf("invalid dependency type")
+		if config.RequiredDependencyDataTypes[i] > 0 {
+			if DEFAULT_ASSETS[dep.AssetType].DataType != config.RequiredDependencyDataTypes[i] {
+				return fmt.Errorf("invalid dependency type")
+			}
 		}
 	}
 
-	if len(adp.Arguments) != len(config.RequiredArgumentTypes) {
-		return fmt.Errorf("arguments length mismatch")
-	}
 	for i, arg := range adp.Arguments {
 		requiredArgType := config.RequiredArgumentTypes[i].String()
 		if strings.HasPrefix(requiredArgType, "int") {

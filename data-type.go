@@ -25,6 +25,7 @@ type Data interface {
 	GetTime() TimeUnit
 	Max() float64
 	Min() float64
+	ValueAt(column ColumnName) (float64, error)
 }
 
 type DataList interface {

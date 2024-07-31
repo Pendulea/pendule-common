@@ -142,6 +142,14 @@ func (p PointTime) Max() float64 {
 	return p.Value
 }
 
+func (p PointTime) ValueAt(column ColumnName) (float64, error) {
+	switch column {
+	case ColumnType.VALUE:
+		return p.Value, nil
+	}
+	return 0.00, fmt.Errorf("column %s not found", column)
+}
+
 func (m PointTime) CSVLine(volumeDecimals int8, requirement CSVCheckListRequirement) []string {
 	ret := []string{}
 

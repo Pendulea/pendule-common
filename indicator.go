@@ -113,8 +113,8 @@ func (b *IndicatorDataBuilder) ComputeUnsafe(dataList ...Data) (*Point, error) {
 			return nil, err
 		}
 		defer b.saveState(state)
-		column := b.cachedArguments[0].(ColumnName)
-		v, err := dataList[0].ValueAt(column)
+		column := b.cachedArguments[0].(string)
+		v, err := dataList[0].ValueAt(ColumnName(column))
 		if err != nil {
 			return nil, err
 		}

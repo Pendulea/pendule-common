@@ -36,13 +36,19 @@ type AllAssetTypes struct {
 
 	CIRCULATING_SUPPLY AssetType
 
+	//RSI with unit data type and column "close"
 	RSI AssetType
 
+	//RSI with any asset and columns
 	RSI2 AssetType
-	SMA  AssetType
-	EMA  AssetType
-	WMA  AssetType
-	HMA  AssetType
+
+	//Moving Averages
+	SMA AssetType
+	EMA AssetType
+	WMA AssetType
+	HMA AssetType
+
+	VWA AssetType
 }
 
 var Asset = AllAssetTypes{
@@ -78,6 +84,8 @@ var Asset = AllAssetTypes{
 	EMA:  "ema",
 	WMA:  "wma",
 	HMA:  "hma",
+
+	VWA: "vwa",
 }
 
 var AssetTypeMap = Asset.ToMap()
@@ -318,6 +326,38 @@ var DEFAULT_ASSETS = AvailableAssets{
 		Asset.RSI2, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
 		"Relative Strength Index 2 (RSI)", "A momentum oscillator that measures the speed and change of price movements, indicating overbought or oversold conditions.",
 		"#614C97",
+	},
+	Asset.SMA: {
+		func(priceUSDA, priceUSDB float64) int8 {
+			return priceDecimals(priceUSDA / priceUSDB)
+		},
+		Asset.SMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		"Simple Moving Average (SMA)", "A simple, arithmetic moving average that is calculated by adding the closing price of a security for a number of time periods and then dividing this total by the number of time periods.",
+		"#873e23",
+	},
+	Asset.EMA: {
+		func(priceUSDA, priceUSDB float64) int8 {
+			return priceDecimals(priceUSDA / priceUSDB)
+		},
+		Asset.EMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		"Exponential Moving Average (EMA)", "A type of moving average that is similar to a simple moving average, except that more weight is given to the latest data.",
+		"#2596be",
+	},
+	Asset.WMA: {
+		func(priceUSDA, priceUSDB float64) int8 {
+			return priceDecimals(priceUSDA / priceUSDB)
+		},
+		Asset.WMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		"Weighted Moving Average (WMA)", "A moving average that gives more weight to recent prices, making it more responsive to new information.",
+		"#b5b5b5",
+	},
+	Asset.HMA: {
+		func(priceUSDA, priceUSDB float64) int8 {
+			return priceDecimals(priceUSDA / priceUSDB)
+		},
+		Asset.HMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		"Hull Moving Average (HMA)", "A moving average that is more responsive to price changes than a simple or exponential moving average.",
+		"#f1ae8a",
 	},
 }
 

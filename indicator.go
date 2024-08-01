@@ -121,6 +121,37 @@ func (b *IndicatorDataBuilder) ComputeUnsafe(dataList ...Data) (*Point, error) {
 		p = state.buildRSI(v, b.cachedArguments[1].(int64))
 	}
 
+	if b.assetType == Asset.SMA || b.assetType == Asset.EMA || b.assetType == Asset.WMA || b.assetType == Asset.HMA {
+		var state *maState = nil
+		if b.prevState == nil && b.cachedParsedState == nil {
+			s := newEmptyMAState(int(b.cachedArguments[1].(int64)))
+			state = &s
+		} else {
+			var err error
+			state, err = parseIndicatorState[maState](b)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		defer b.saveState(state)
+		column := b.cachedArguments[0].(string)
+		v, err := dataList[0].ValueAt(ColumnName(column))
+		if err != nil {
+			return nil, err
+		}
+		switch b.assetType {
+		case Asset.SMA:
+			p = state.buildSMA(v, int(b.cachedArguments[1].(int64)))
+		case Asset.EMA:
+			p = state.buildEMA(v, int(b.cachedArguments[1].(int64)))
+		case Asset.WMA:
+			p = state.buildWMA(v, int(b.cachedArguments[1].(int64)))
+		case Asset.HMA:
+			p = state.buildHMA(v, int(b.cachedArguments[1].(int64)))
+		}
+	}
+
 	if p == nil {
 		return nil, errors.New("not implemented")
 	}

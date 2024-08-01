@@ -123,7 +123,7 @@ func (b *IndicatorDataBuilder) ComputeUnsafe(dataList ...Data) (*Point, error) {
 
 	if b.assetType == Asset.SMA || b.assetType == Asset.EMA || b.assetType == Asset.WMA || b.assetType == Asset.HMA {
 		var state *maState = nil
-		if b.prevState == nil && b.cachedParsedState == nil {
+		if b.prevState == nil || len(b.prevState) == 0 {
 			s := newEmptyMAState(int(b.cachedArguments[1].(int64)))
 			state = &s
 		} else {

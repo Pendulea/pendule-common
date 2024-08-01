@@ -41,6 +41,9 @@ func (adp AssetAddressParsed) IsValid() error {
 	if len(config.RequiredArgumentTypes) != len(adp.Arguments) {
 		return fmt.Errorf("invalid number of arguments")
 	}
+	if len(config.RequiredDependencyDataTypes) != len(adp.Dependencies) {
+		return fmt.Errorf("invalid number of dependencies")
+	}
 
 	for i, depAddr := range adp.Dependencies {
 		dep, err := depAddr.Parse()

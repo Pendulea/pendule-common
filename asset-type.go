@@ -129,11 +129,6 @@ type AssetStateConfig struct {
 
 type AvailableAssets map[AssetType]AssetStateConfig
 
-type RequiredDependency struct {
-	Type      DataType       `json:"type"`
-	Arguments []reflect.Type `json:"arguments"`
-}
-
 var DEFAULT_ASSETS = AvailableAssets{
 	// Binance spot trades
 	Asset.SPOT_PRICE: {

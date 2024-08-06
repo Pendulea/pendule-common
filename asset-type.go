@@ -367,14 +367,14 @@ var DEFAULT_ASSETS = AvailableAssets{
 		"Hull Moving Average (HMA)", "A moving average that is more responsive to price changes than a simple or exponential moving average.",
 		"#f1ae8a",
 	},
-	Asset.WA: {
-		func(priceUSDA, priceUSDB float64) int8 {
-			return priceDecimals(priceUSDA / priceUSDB)
-		},
-		Asset.WA, POINT, []DataType{UNIT, QUANTITY}, []reflect.Type{reflect.TypeOf("string"), reflect.TypeOf("string")}, true,
-		"Weighted Average", "The average of a set of values, each of which is multiplied by a weight.",
-		"#f1ae8a",
-	},
+	// Asset.WA: {
+	// 	func(priceUSDA, priceUSDB float64) int8 {
+	// 		return priceDecimals(priceUSDA / priceUSDB)
+	// 	},
+	// 	Asset.WA, POINT, []DataType{UNIT, QUANTITY}, []reflect.Type{reflect.TypeOf("string"), reflect.TypeOf("string")}, true,
+	// 	"Weighted Average", "The average of a set of values, each of which is multiplied by a weight.",
+	// 	"#f1ae8a",
+	// },
 }
 
 type AvailableAssetJSON struct {

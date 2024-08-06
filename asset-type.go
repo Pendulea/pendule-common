@@ -48,7 +48,7 @@ type AllAssetTypes struct {
 	WMA AssetType
 	HMA AssetType
 
-	VWA AssetType
+	WA AssetType
 }
 
 var Asset = AllAssetTypes{
@@ -85,7 +85,7 @@ var Asset = AllAssetTypes{
 	WMA:  "wma",
 	HMA:  "hma",
 
-	VWA: "vwa",
+	WA: "wa",
 }
 
 var AssetTypeMap = Asset.ToMap()
@@ -130,9 +130,17 @@ type AssetStateConfig struct {
 
 	RequiredDependencyDataTypes []DataType
 	RequiredArgumentTypes       []reflect.Type
-	Label                       string
-	Description                 string
-	Color                       string
+
+	/*
+		only for assets with dependencies,
+		if true the asset won't be indexed directly on its dependency's timeframe's data
+		but instead will recalculate its data for every timeframe from the data of the minimum timeframe of its dependencies.
+	*/
+	IndexedOnMinTimeframe bool
+
+	Label       string
+	Description string
+	Color       string
 }
 
 type AvailableAssets map[AssetType]AssetStateConfig
@@ -143,7 +151,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return priceDecimals(priceUSDA / priceUSDB)
 		},
-		Asset.SPOT_PRICE, UNIT, nil, nil,
+		Asset.SPOT_PRICE, UNIT, nil, nil, false,
 		"Spot Price", "The current price at which an asset is bought or sold in the spot market on Binance.",
 		"#5F9EA0",
 	},
@@ -151,7 +159,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 0.01)
 		},
-		Asset.SPOT_VOLUME, QUANTITY, nil, nil,
+		Asset.SPOT_VOLUME, QUANTITY, nil, nil, false,
 		"Spot Volume", "The total amount of an asset traded in the spot market on Binance.",
 		"#228B22",
 	},
@@ -161,7 +169,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_P1, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_P1, UNIT, nil, nil, false,
 		"Liquidity +1% Price", "Available liquidity at a price level 1% above the current market price on Binance.",
 		"#044f56",
 	},
@@ -169,7 +177,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_P2, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_P2, UNIT, nil, nil, false,
 		"Liquidity +2% Price", "Available liquidity at a price level 2% above the current market price on Binance.",
 		"#07636c",
 	},
@@ -177,7 +185,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_P3, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_P3, UNIT, nil, nil, false,
 		"Liquidity +3% Price", "Available liquidity at a price level 3% above the current market price on Binance.",
 		"#0a7882",
 	},
@@ -185,7 +193,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_P4, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_P4, UNIT, nil, nil, false,
 		"Liquidity +4% Price", "Available liquidity at a price level 4% above the current market price on Binance.",
 		"#0e8d99",
 	},
@@ -193,7 +201,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_P5, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_P5, UNIT, nil, nil, false,
 		"Liquidity +5% Price", "Available liquidity at a price level 5% above the current market price on Binance.",
 		"#12a3b0",
 	},
@@ -201,7 +209,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_M1, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_M1, UNIT, nil, nil, false,
 		"Liquidity -1% Price", "Available liquidity at a price level 1% below the current market price on Binance.",
 		"#0b186b",
 	},
@@ -209,7 +217,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_M2, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_M2, UNIT, nil, nil, false,
 		"Liquidity -2% Price", "Available liquidity at a price level 2% below the current market price on Binance.",
 		"#0b186b",
 	},
@@ -217,7 +225,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_M3, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_M3, UNIT, nil, nil, false,
 		"Liquidity -3% Price", "Available liquidity at a price level 3% below the current market price on Binance.",
 		"#08135c",
 	},
@@ -225,7 +233,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_M4, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_M4, UNIT, nil, nil, false,
 		"Liquidity -4% Price", "Available liquidity at a price level 4% below the current market price on Binance.",
 		"#060f4e",
 	},
@@ -233,7 +241,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.BOOK_DEPTH_M5, UNIT, nil, nil,
+		Asset.BOOK_DEPTH_M5, UNIT, nil, nil, false,
 		"Liquidity -5% Price", "Available liquidity at a price level 5% below the current market price on Binance.",
 		"#040a3f",
 	},
@@ -243,7 +251,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 10)
 		},
-		Asset.METRIC_SUM_OPEN_INTEREST, UNIT, nil, nil,
+		Asset.METRIC_SUM_OPEN_INTEREST, UNIT, nil, nil, false,
 		"Open Interest", "The total number of outstanding derivative contracts, such as options or futures, that have not been settled on Binance.",
 		"#f1ae8a",
 	},
@@ -252,7 +260,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return 4
 		},
-		Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil,
+		Asset.METRIC_COUNT_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil, false,
 		"Taker Long/Short Ratio", "The ratio of long to short positions taken by top traders on Binance.",
 		"#5e4e29",
 	},
@@ -260,7 +268,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return 4
 		},
-		Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil,
+		Asset.METRIC_SUM_TOP_TRADER_LONG_SHORT_RATIO, UNIT, nil, nil, false,
 		"Top Trader Long/Short Ratio", "The ratio of the sum of long to short positions taken by top traders on Binance.",
 		"#6d5e3d",
 	},
@@ -268,7 +276,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return 4
 		},
-		Asset.METRIC_COUNT_LONG_SHORT_RATIO, UNIT, nil, nil,
+		Asset.METRIC_COUNT_LONG_SHORT_RATIO, UNIT, nil, nil, false,
 		"Long/Short Ratio", "The overall ratio of long to short positions taken by all traders on Binance.",
 		"#b09763",
 	},
@@ -276,7 +284,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return 4
 		},
-		Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO, UNIT, nil, nil,
+		Asset.METRIC_SUM_TAKER_LONG_SHORT_VOL_RATIO, UNIT, nil, nil, false,
 		"Taker Long/Short Volume Ratio", "The ratio of long to short volumes taken by top traders on Binance.",
 		"#b8a173",
 	},
@@ -286,7 +294,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return 0
 		},
-		Asset.CIRCULATING_SUPPLY, UNIT, nil, nil,
+		Asset.CIRCULATING_SUPPLY, UNIT, nil, nil, false,
 		"Circulating Supply", "The total number of tokens that are currently available in circulation.",
 		"#eaeaea",
 	},
@@ -296,7 +304,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return priceDecimals(priceUSDA / priceUSDB)
 		},
-		Asset.FUTURES_PRICE, UNIT, nil, nil,
+		Asset.FUTURES_PRICE, UNIT, nil, nil, false,
 		"Futures Price", "The current price at which a futures contract is trading on Binance.",
 		"#386061",
 	},
@@ -304,7 +312,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return countDivisionsTo(priceUSDA/priceUSDB, 0.01)
 		},
-		Asset.FUTURES_VOLUME, QUANTITY, nil, nil,
+		Asset.FUTURES_VOLUME, QUANTITY, nil, nil, false,
 		"Futures Volume", "The total amount of futures contracts traded on Binance.",
 		"#0b430b",
 	},
@@ -314,7 +322,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return 2
 		},
-		Asset.RSI, POINT, []DataType{UNIT}, []reflect.Type{reflect.TypeOf(int64(0))},
+		Asset.RSI, POINT, []DataType{UNIT}, []reflect.Type{reflect.TypeOf(int64(0))}, false,
 		"Relative Strength Index (RSI)", "A momentum oscillator that measures the speed and change of price movements, indicating overbought or oversold conditions.",
 		"#614C97",
 	},
@@ -323,7 +331,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return 2
 		},
-		Asset.RSI2, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		Asset.RSI2, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))}, false,
 		"Relative Strength Index 2 (RSI)", "A momentum oscillator that measures the speed and change of price movements, indicating overbought or oversold conditions.",
 		"#614C97",
 	},
@@ -331,7 +339,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return priceDecimals(priceUSDA / priceUSDB)
 		},
-		Asset.SMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		Asset.SMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))}, false,
 		"Simple Moving Average (SMA)", "A simple, arithmetic moving average that is calculated by adding the closing price of a security for a number of time periods and then dividing this total by the number of time periods.",
 		"#873e23",
 	},
@@ -339,7 +347,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return priceDecimals(priceUSDA / priceUSDB)
 		},
-		Asset.EMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		Asset.EMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))}, false,
 		"Exponential Moving Average (EMA)", "A type of moving average that is similar to a simple moving average, except that more weight is given to the latest data.",
 		"#2596be",
 	},
@@ -347,7 +355,7 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return priceDecimals(priceUSDA / priceUSDB)
 		},
-		Asset.WMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		Asset.WMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))}, false,
 		"Weighted Moving Average (WMA)", "A moving average that gives more weight to recent prices, making it more responsive to new information.",
 		"#b5b5b5",
 	},
@@ -355,8 +363,16 @@ var DEFAULT_ASSETS = AvailableAssets{
 		func(priceUSDA, priceUSDB float64) int8 {
 			return priceDecimals(priceUSDA / priceUSDB)
 		},
-		Asset.HMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))},
+		Asset.HMA, POINT, []DataType{-1}, []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(int64(0))}, false,
 		"Hull Moving Average (HMA)", "A moving average that is more responsive to price changes than a simple or exponential moving average.",
+		"#f1ae8a",
+	},
+	Asset.WA: {
+		func(priceUSDA, priceUSDB float64) int8 {
+			return priceDecimals(priceUSDA / priceUSDB)
+		},
+		Asset.WA, POINT, []DataType{UNIT, QUANTITY}, []reflect.Type{reflect.TypeOf("string"), reflect.TypeOf("string")}, true,
+		"Weighted Average", "The average of a set of values, each of which is multiplied by a weight.",
 		"#f1ae8a",
 	},
 }

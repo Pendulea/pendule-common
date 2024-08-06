@@ -17,6 +17,7 @@ type AssetJSON struct {
 	DataType                   DataType               `json:"data_type"`
 	Decimals                   int8                   `json:"decimals"`
 	MinDataDate                string                 `json:"min_data_date"`
+	LastReadTime               TimeUnit               `json:"last_read_time"`
 }
 
 func (a AssetJSON) FindConsistencyByTimeframe(timeframe time.Duration) *Consistency {

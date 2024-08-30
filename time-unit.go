@@ -51,7 +51,7 @@ func NewTimeUnit(unknownTime int64) TimeUnit {
 }
 
 func (t TimeUnit) ToTime() time.Time {
-	return time.Unix(0, int64(t)*int64(TIME_UNIT_DURATION))
+	return time.Unix(0, int64(t)*int64(TIME_UNIT_DURATION)).UTC()
 }
 
 func (t TimeUnit) Int() int64 {

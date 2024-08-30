@@ -90,7 +90,11 @@ func (f format) TimeFrameToLabel(timeFrame time.Duration) (string, error) {
 // StrDateToDate converts a string date to a time.Time object
 func (f format) StrDateToDate(dateStr string) (time.Time, error) {
 	layout := "2006-01-02T15:04:05Z"
-	return time.Parse(layout, dateStr+"T00:00:00Z")
+	t, err := time.Parse(layout, dateStr+"T00:00:00Z")
+	if err != nil {
+		return time.Time{}, err
+	}
+	return t.UTC(), nil
 }
 
 // FormatDateStr formats a time.Time object to a string
